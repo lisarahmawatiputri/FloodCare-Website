@@ -1,10 +1,10 @@
-@extends('LandingPage.layouts.app')
+@extends('LandingPage.Layouts.app')
 
-@section('title', 'Home - FlexStart')
+@section('title', 'FloodCare')
 
 @section('content')
 
-  @include('LandingPage.partials.header')
+  @include('LandingPage.Partials.header')
 
   <main class="main">
 
@@ -79,6 +79,6 @@
 
   </main>
 
-  @include('LandingPage.partials.footer')
+  @include('LandingPage.Partials.footer')
 
 @endsection

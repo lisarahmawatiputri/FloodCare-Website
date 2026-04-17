@@ -1,11 +1,11 @@
-@extends('LandingPage.layouts.app')
+@extends('LandingPage.Layouts.app')
 
-@section('title', 'Blog - FlexStart')
+@section('title', 'Blog - FloodCare')
 @section('body_class', 'blog-page')
 
 @section('content')
 
-    @include('LandingPage.partials.header')
+    @include('LandingPage.Partials.header')
 
     <main class="main">
 
@@ -292,6 +292,6 @@
 
     </main>
 
-    @include('LandingPage.partials.footer')
+    @include('LandingPage.Partials.footer')
 
 @endsection
