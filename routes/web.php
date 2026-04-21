@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+// Landing Page Routes
 Route::get('/', function () {
     return view('LandingPage.index');
 })->name('home');
@@ -25,3 +27,16 @@ Route::get('/service-details', function () {
 Route::get('/starter-page', function () {
     return view('LandingPage.starter-page');
 })->name('starter-page');
+
+// Auth & Dashboard Routes
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
