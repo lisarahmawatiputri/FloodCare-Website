@@ -1,8 +1,14 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\LaporanController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Landing Page Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/', function () {
     return view('LandingPage.index');
@@ -28,7 +34,12 @@ Route::get('/starter-page', function () {
     return view('LandingPage.starter-page');
 })->name('starter-page');
 
-// Auth & Dashboard Routes
+/*
+|--------------------------------------------------------------------------
+| Auth & Dashboard
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -39,54 +50,75 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Admin Routes
+
+
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+
+    // Dashboard
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
 
-    // Laporan
-    Route::get('/laporan', function () {
-        return view('admin.laporan.index');
-    })->name('laporan.index');
-    Route::get('/laporan/{id}', function ($id) {
-        return view('admin.laporan.show');
-    })->name('laporan.show');
+   
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/{id}', [LaporanController::class, 'show'])->name('laporan.show');
 
-    // Donasi
+    /*
+    |--------------------------------------------------------------------------
+    | DONASI
+    |--------------------------------------------------------------------------
+    */
     Route::get('/donasi', function () {
         return view('admin.donasi.index');
     })->name('donasi.index');
+
     Route::get('/donasi/{id}', function ($id) {
         return view('admin.donasi.show');
     })->name('donasi.show');
 
-    // Artikel
+    /*
+    |--------------------------------------------------------------------------
+    | ARTIKEL
+    |--------------------------------------------------------------------------
+    */
     Route::get('/artikel', function () {
         return view('admin.artikel.index');
     })->name('artikel.index');
+
     Route::get('/artikel/create', function () {
         return view('admin.artikel.create');
     })->name('artikel.create');
+
     Route::get('/artikel/{id}/edit', function ($id) {
         return view('admin.artikel.edit');
     })->name('artikel.edit');
 
-    // Video
+    /*
+    |--------------------------------------------------------------------------
+    | VIDEO
+    |--------------------------------------------------------------------------
+    */
     Route::get('/video', function () {
         return view('admin.video.index');
     })->name('video.index');
+
     Route::get('/video/create', function () {
         return view('admin.video.create');
     })->name('video.create');
 
-    // Users
+    /*
+    |--------------------------------------------------------------------------
+    | USERS
+    |--------------------------------------------------------------------------
+    */
     Route::get('/users', function () {
         return view('admin.users.index');
     })->name('users.index');
+
     Route::get('/users/{id}', function ($id) {
         return view('admin.users.show');
     })->name('users.show');
+
 });
 
 require __DIR__.'/auth.php';
