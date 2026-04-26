@@ -1,82 +1,267 @@
 @extends('layouts.admin')
 
-@section('title', 'Kelola User')
+@section('title', 'Detail User')
+
+@section('extra-css')
+<link rel="stylesheet" href="{{ asset('assets_admin/css/user.css') }}">
+@endsection
 
 @section('content')
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Profil Pengguna') }}
-            </h2>
-            <a href="{{ route('admin.users.index') }}" class="text-sm font-bold text-orange-600 hover:text-orange-800">&larr; Kembali</a>
-        </div>
-    </x-slot>
 
-    <div class="py-12 bg-[#f8f9fa]">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+{{-- Header --}}
+<div class="fc-page-header">
+    <div>
+        <h1 class="fc-page-title">Detail User</h1>
+    </div>
+    <a href="{{ route('admin.users.index') }}" class="fc-btn fc-btn-ghost">
+        <i class="mdi mdi-arrow-left"></i> Kembali
+    </a>
+</div>
 
-            <div class="bg-white p-8 shadow sm:rounded-lg border-l-4 border-orange-500">
-                <div class="flex flex-col md:flex-row justify-between gap-6">
-                    <div class="flex-1">
-                        <h3 class="text-xl font-bold text-gray-900 mb-6 underline decoration-orange-200 underline-offset-8">Informasi Personal</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="text-xs font-bold text-gray-400 uppercase">Nama Lengkap</label>
-                                <p class="text-lg font-semibold text-gray-800">{{ $user->nama_lengkap }}</p>
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-gray-400 uppercase">Status Akun</label>
-                                <p class="mt-1"><span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase">Aktif</span></p>
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-gray-400 uppercase">Email</label>
-                                <p class="text-gray-700 font-medium">{{ $user->email }}</p>
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-gray-400 uppercase">No. Telepon</label>
-                                <p class="text-gray-700 font-medium">{{ $user->no_telepon ?? 'Tidak ada data' }}</p>
-                            </div>
-                        </div>
+@php
+$user = $user ?? (object)[
+    'nama_lengkap' => 'Ahmad Rizki',
+    'email'        => 'rizki.ahmad@gmail.com',
+    'no_telepon'   => '0878-1234-5678',
+    'role'         => 'masyarakat',
+    'provider'     => 'google',
+    'status'       => 'aktif',
+    'created_at'   => '10 April 2026',
+    'last_active'  => 'Hari ini, 09:42 WIB',
+    'id'           => 3,
+];
+$initials = strtoupper(substr($user->nama_lengkap, 0, 2));
+$colors   = ['#ff6600','#2a7de8','#2abe8a','#e8a82a','#9b59b6'];
+$color    = $colors[crc32($user->email) % count($colors)];
+
+$laporanUser = $laporanUser ?? collect([
+    ['no'=>1,'judul'=>'Banjir Jl. Mastrip',        'tinggi'=>60, 'risiko'=>'tinggi'],
+    ['no'=>2,'judul'=>'Genangan Jl. Veteran',       'tinggi'=>25, 'risiko'=>'sedang'],
+    ['no'=>3,'judul'=>'Banjir Sumbersari Barat',    'tinggi'=>12, 'risiko'=>'rendah'],
+    ['no'=>4,'judul'=>'Luapan Kali Jompo',          'tinggi'=>40, 'risiko'=>'sedang'],
+    ['no'=>5,'judul'=>'Genangan Perum Griya',       'tinggi'=>10, 'risiko'=>'rendah'],
+]);
+@endphp
+
+<div class="user-show-grid">
+
+    {{-- KOLOM KIRI --}}
+    <div>
+
+        {{-- Profile Card --}}
+        <div class="user-profile-card">
+            <div class="user-profile-avatar" style="background:{{ $color }}">
+                {{ $initials }}
+            </div>
+            <div class="user-profile-name">{{ $user->nama_lengkap }}</div>
+            <div class="user-profile-email">{{ $user->email }}</div>
+
+            <div class="user-profile-tags">
+                <span class="user-tag tag-role-{{ $user->role }}">{{ ucfirst($user->role) }}</span>
+                <span class="user-tag tag-{{ $user->status ?? 'aktif' }}">{{ ucfirst($user->status ?? 'Aktif') }}</span>
+                <span class="user-tag tag-{{ $user->provider ?? 'email' }}">{{ ucfirst($user->provider ?? 'Email') }}</span>
+            </div>
+
+            <hr class="user-profile-divider">
+
+            <div class="user-info-list">
+                <div class="user-info-row">
+                    <div class="user-info-icon"><i class="mdi mdi-phone-outline"></i></div>
+                    <div class="user-info-content">
+                        <div class="user-info-label">No. telepon</div>
+                        <div class="user-info-value">{{ $user->no_telepon ?? '—' }}</div>
                     </div>
-
-                    <div class="flex flex-col items-end gap-3">
-                        <div class="bg-red-50 p-4 rounded-lg border border-red-100 text-right">
-                            <p class="text-xs text-red-600 font-bold mb-2 uppercase tracking-tighter">Deteksi Spammer?</p>
-                            <form action="#" method="POST">
-                                @csrf
-                                <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow-md transition transform hover:scale-105">
-                                    Blokir / Batasi Akun
-                                </button>
-                            </form>
+                </div>
+                <div class="user-info-row">
+                    <div class="user-info-icon"><i class="mdi mdi-calendar-outline"></i></div>
+                    <div class="user-info-content">
+                        <div class="user-info-label">Bergabung</div>
+                        <div class="user-info-value">
+                            @if(is_string($user->created_at))
+                                {{ $user->created_at }}
+                            @else
+                                {{ $user->created_at->format('d F Y') }}
+                            @endif
                         </div>
                     </div>
                 </div>
+                <div class="user-info-row">
+                    <div class="user-info-icon"><i class="mdi mdi-map-marker-outline"></i></div>
+                    <div class="user-info-content">
+                        <div class="user-info-label">Terakhir aktif</div>
+                        <div class="user-info-value">{{ $user->last_active ?? '—' }}</div>
+                    </div>
+                </div>
+                <div class="user-info-row">
+                    <!-- <div class="user-info-icon"><i class="mdi mdi-shield-outline"></i></div>
+                    <div class="user-info-content">
+                        <div class="user-info-label">IP terakhir</div>
+                        <div class="user-info-value">{{ $user->ip_terakhir ?? '—' }}</div>
+                    </div> -->
+                </div>
             </div>
+        </div>
 
-            <div class="bg-white p-8 shadow sm:rounded-lg border border-gray-100">
-                <h3 class="text-xl font-bold text-gray-900 mb-6">Riwayat Laporan Banjir</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 border border-gray-50">
-                        <thead class="bg-gray-50">
+        {{-- Aksi Card --}}
+        <div class="user-aksi-card">
+            <div class="user-aksi-title">Aksi akun</div>
+            <div class="user-aksi-grid">
+                <a href="#" class="fc-btn fc-btn-ghost">
+                    <i class="mdi mdi-pencil-outline"></i> Edit profil
+                </a>
+                <button type="button" class="fc-btn fc-btn-ghost"
+                    onclick="document.getElementById('modal-role').style.display='flex'">
+                    <i class="mdi mdi-account-convert-outline"></i> Ubah role
+                </button>
+                <form method="POST" action="#" class="fc-btn-full">
+                    @csrf @method('PATCH')
+                    <button type="submit" class="fc-btn fc-btn-warning"
+                        data-confirm="Yakin ingin {{ ($user->status ?? 'aktif') === 'aktif' ? 'nonaktifkan' : 'aktifkan' }} user ini?">
+                        <i class="mdi mdi-pause-circle-outline"></i>
+                        {{ ($user->status ?? 'aktif') === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}
+                    </button>
+                </form>
+                <form method="POST" action="#" class="fc-btn-full">
+                    @csrf @method('PATCH')
+                    <button type="submit" class="fc-btn fc-btn-danger"
+                        data-confirm="Yakin ingin memblokir user ini? Tindakan ini tidak bisa diurungkan.">
+                        <i class="mdi mdi-cancel"></i> Blokir user ini
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    {{-- KOLOM KANAN --}}
+    <div>
+
+        {{-- Stat mini --}}
+        <div class="user-stat-mini-grid">
+            <div class="user-stat-mini">
+                <div class="user-stat-mini-icon red">
+                    <i class="mdi mdi-alert-circle-outline"></i>
+                </div>
+                <div>
+                    <div class="user-stat-mini-num">{{ $totalLaporan ?? 7 }}</div>
+                    <div class="user-stat-mini-label">Total laporan</div>
+                </div>
+            </div>
+            <div class="user-stat-mini">
+                <div class="user-stat-mini-icon green">
+                    <i class="mdi mdi-check-circle-outline"></i>
+                </div>
+                <div>
+                    <div class="user-stat-mini-num">{{ $totalKonfirmasi ?? 14 }}</div>
+                    <div class="user-stat-mini-label">Konfirmasi laporan</div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Tab: Laporan Banjir / Konfirmasi --}}
+        <div class="user-tab-card">
+            <div class="user-tab-header">
+                <button class="user-tab-btn active" data-tab="laporan">Laporan banjir</button>
+                <button class="user-tab-btn" data-tab="konfirmasi">Konfirmasi</button>
+            </div>
+            <div class="user-tab-content">
+
+                {{-- Tab Laporan --}}
+                <div class="user-tab-pane active" id="tab-laporan">
+                    <table class="user-inner-table">
+                        <thead>
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Lokasi Kejadian</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Status</th>
+                                <th width="6%">#</th>
+                                <th>Judul laporan</th>
+                                <th width="14%">Tinggi air</th>
+                                <th width="14%">Risiko</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <tr class="text-sm">
-                                <td class="px-6 py-4 font-mono text-gray-500">#FL-2026-001</td>
-                                <td class="px-6 py-4 font-medium text-gray-800">Jl. Embong Malang, Surabaya</td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-bold uppercase tracking-widest">Diproses</span>
+                        <tbody>
+                            @foreach($laporanUser as $i => $lap)
+                            @php
+                                $judul  = is_array($lap) ? $lap['judul']  : $lap->judul;
+                                $tinggi = is_array($lap) ? $lap['tinggi'] : $lap->tinggi_air;
+                                $risiko = is_array($lap) ? $lap['risiko'] : $lap->tingkat_risiko;
+                                $no     = is_array($lap) ? $lap['no']     : ($i + 1);
+                            @endphp
+                            <tr>
+                                <td class="user-no">{{ $no }}</td>
+                                <td class="user-nama">{{ $judul }}</td>
+                                <td>
+                                    <span class="user-tinggi-{{ $risiko }}">{{ $tinggi }} cm</span>
+                                </td>
+                                <td>
+                                    <span class="status-badge {{ $risiko }}">{{ ucfirst($risiko) }}</span>
                                 </td>
                             </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
-            </div>
 
+                {{-- Tab Konfirmasi --}}
+                <div class="user-tab-pane" id="tab-konfirmasi">
+                    <table class="user-inner-table">
+                        <thead>
+                            <tr>
+                                <th width="6%">#</th>
+                                <th>Laporan dikonfirmasi</th>
+                                <th width="20%">Tanggal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($konfirmasiUser ?? [] as $i => $k)
+                            <tr>
+                                <td class="user-no">{{ $i + 1 }}</td>
+                                <td class="user-nama">{{ $k->laporan->judul ?? '—' }}</td>
+                                <td class="user-email">{{ $k->created_at->format('d M Y') }}</td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="3" class="fc-table-empty">Belum ada konfirmasi</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
         </div>
+
     </div>
-</x-app-layout>
+</div>
+
+{{-- Modal Ubah Role --}}
+<div id="modal-role" class="fc-modal-backdrop" style="display:none;">
+    <div class="fc-modal-box">
+        <h3 class="fc-modal-title">Ubah Role</h3>
+        <p class="fc-modal-sub">Mengubah role untuk <strong>{{ $user->nama_lengkap }}</strong></p>
+        <form method="POST" action="#">
+            @csrf @method('PATCH')
+            <div class="fc-form-group">
+                <label class="fc-label">Role baru</label>
+                <select name="role" class="fc-select">
+                    <option value="masyarakat" {{ ($user->role ?? '') === 'masyarakat' ? 'selected' : '' }}>Masyarakat</option>
+                    <option value="admin"      {{ ($user->role ?? '') === 'admin'      ? 'selected' : '' }}>Admin</option>
+                    <option value="superadmin" {{ ($user->role ?? '') === 'superadmin' ? 'selected' : '' }}>Superadmin</option>
+                </select>
+            </div>
+            <div class="fc-modal-actions">
+                <button type="button" class="fc-btn fc-btn-ghost fc-btn-full"
+                    onclick="document.getElementById('modal-role').style.display='none'">
+                    Batal
+                </button>
+                <button type="submit" class="fc-btn fc-btn-primary fc-btn-full">
+                    Simpan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@endsection
+
+@push('scripts')
+<script src="{{ asset('assets_admin/js/user.js') }}"></script>
+@endpush

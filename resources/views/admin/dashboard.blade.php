@@ -4,221 +4,129 @@
 
 @section('content')
 
-{{-- Page Header --}}
-<div class="page-header">
-    <h3 class="page-title">
-        <span class="page-title-icon bg-gradient-primary text-white me-2">
-            <i class="mdi mdi-home"></i>
-        </span> Dashboard
-    </h3>
-    <nav aria-label="breadcrumb">
-        <ul class="breadcrumb">
-            <li class="breadcrumb-item active" aria-current="page">
-                <span>Overview</span>
-            </li>
-        </ul>
-    </nav>
+<div class="fc-page-header">
+    <h1>Dashboard</h1>
+    <p>{{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM Y') }}</p>
 </div>
 
-{{-- Stats Cards --}}
-<div class="row">
-    <div class="col-md-3 stretch-card grid-margin">
-        <div class="card bg-gradient-danger card-img-holder text-white">
-            <div class="card-body">
-                <img src="{{ asset('assets_admin/images/dashboard/circle.svg') }}" class="card-img-absolute" alt="circle">
-                <h4 class="font-weight-normal mb-3">Total Laporan <i class="mdi mdi-water mdi-24px float-end"></i></h4>
-                <h2 class="mb-5">0</h2>
-                <h6 class="card-text">Laporan banjir masuk</h6>
-            </div>
-        </div>
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-icon red"><i class="mdi mdi-alert-circle-outline"></i></div>
+        <div class="stat-number">{{ $totalLaporan ?? 24 }}</div>
+        <div class="stat-label">Laporan banjir masuk</div>
+        <div class="stat-trend up"><i class="mdi mdi-trending-up"></i> +8% minggu ini</div>
     </div>
-    <div class="col-md-3 stretch-card grid-margin">
-        <div class="card bg-gradient-info card-img-holder text-white">
-            <div class="card-body">
-                <img src="{{ asset('assets_admin/images/dashboard/circle.svg') }}" class="card-img-absolute" alt="circle">
-                <h4 class="font-weight-normal mb-3">Total Donasi <i class="mdi mdi-heart mdi-24px float-end"></i></h4>
-                <h2 class="mb-5">0</h2>
-                <h6 class="card-text">Donasi terkumpul</h6>
-            </div>
-        </div>
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="mdi mdi-play-circle-outline"></i></div>
+        <div class="stat-number">{{ $totalVideo ?? 12 }}</div>
+        <div class="stat-label">Video edukasi aktif</div>
+        <div class="stat-trend up"><i class="mdi mdi-trending-up"></i> +2 bulan ini</div>
     </div>
-    <div class="col-md-3 stretch-card grid-margin">
-        <div class="card bg-gradient-success card-img-holder text-white">
-            <div class="card-body">
-                <img src="{{ asset('assets_admin/images/dashboard/circle.svg') }}" class="card-img-absolute" alt="circle">
-                <h4 class="font-weight-normal mb-3">Total Artikel <i class="mdi mdi-newspaper mdi-24px float-end"></i></h4>
-                <h2 class="mb-5">0</h2>
-                <h6 class="card-text">Artikel dipublikasi</h6>
-            </div>
-        </div>
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="mdi mdi-newspaper-variant-outline"></i></div>
+        <div class="stat-number">{{ $totalArtikel ?? 38 }}</div>
+        <div class="stat-label">Artikel dipublikasi</div>
+        <div class="stat-trend up"><i class="mdi mdi-trending-up"></i> +5 bulan ini</div>
     </div>
-    <div class="col-md-3 stretch-card grid-margin">
-        <div class="card bg-gradient-warning card-img-holder text-white">
-            <div class="card-body">
-                <img src="{{ asset('assets_admin/images/dashboard/circle.svg') }}" class="card-img-absolute" alt="circle">
-                <h4 class="font-weight-normal mb-3">Total User <i class="mdi mdi-account-multiple mdi-24px float-end"></i></h4>
-                <h2 class="mb-5">0</h2>
-                <h6 class="card-text">User terdaftar</h6>
-            </div>
-        </div>
+    <div class="stat-card">
+        <div class="stat-icon amber"><i class="mdi mdi-account-group-outline"></i></div>
+        <div class="stat-number">{{ $totalUser ?? 142 }}</div>
+        <div class="stat-label">Total user terdaftar</div>
+        <div class="stat-trend up"><i class="mdi mdi-trending-up"></i> +14 minggu ini</div>
     </div>
 </div>
 
-{{-- Charts Row --}}
-<div class="row">
-    <div class="col-md-7 grid-margin stretch-card">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Statistik Laporan Banjir</h4>
-                <div style="position:relative; height:250px; width:100%;">
-                    <canvas id="laporan-bar-chart"></canvas>
-                </div>
-            </div>
+<div class="dash-row dash-row-2">
+
+    <div class="dash-card">
+        <div class="dash-card-header">
+            <span class="dash-card-title">Laporan terbaru</span>
+            <a href="{{ route('admin.laporan.index') }}" class="dash-card-link">Lihat semua</a>
         </div>
+        @forelse($laporanTerbaru ?? [] as $lap)
+        <div class="laporan-item">
+            <span class="laporan-dot {{ $lap->tingkat_banjir }}"></span>
+            <div class="laporan-body">
+                <div class="laporan-lokasi">{{ $lap->lokasi }}</div>
+                <div class="laporan-meta">{{ $lap->created_at->diffForHumans() }} &middot; {{ $lap->tinggi_air }}cm</div>
+            </div>
+            <span class="status-badge {{ $lap->tingkat_banjir }}">{{ ucfirst($lap->tingkat_banjir) }}</span>
+        </div>
+        @empty
+        @php
+        $dummies = [
+            ['lokasi'=>'Jl. Mastrip, Jember',    'waktu'=>'2 jam lalu', 'tinggi'=>'60','tingkat'=>'tinggi'],
+            ['lokasi'=>'Griya Indah, Bondowoso', 'waktu'=>'5 jam lalu', 'tinggi'=>'30','tingkat'=>'sedang'],
+            ['lokasi'=>'Ds. Sukorambi, Jember',  'waktu'=>'Kemarin',    'tinggi'=>'15','tingkat'=>'rendah'],
+            ['lokasi'=>'Jl. Kaliurang, Jember',  'waktu'=>'Kemarin',    'tinggi'=>'25','tingkat'=>'sedang'],
+        ];
+        @endphp
+        @foreach($dummies as $d)
+        <div class="laporan-item">
+            <span class="laporan-dot {{ $d['tingkat'] }}"></span>
+            <div class="laporan-body">
+                <div class="laporan-lokasi">{{ $d['lokasi'] }}</div>
+                <div class="laporan-meta">{{ $d['waktu'] }} &middot; {{ $d['tinggi'] }}cm</div>
+            </div>
+            <span class="status-badge {{ $d['tingkat'] }}">{{ ucfirst($d['tingkat']) }}</span>
+        </div>
+        @endforeach
+        @endforelse
     </div>
-    <div class="col-md-5 grid-margin stretch-card">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Status Laporan</h4>
-                <div style="position:relative; height:250px; width:100%;">
-                    <canvas id="status-doughnut-chart"></canvas>
-                </div>
-            </div>
+
+    <div class="dash-card">
+        <div class="dash-card-header">
+            <span class="dash-card-title">Sebaran per kecamatan</span>
         </div>
+        @php
+        $sebaran = $sebaranKecamatan ?? collect([
+            ['nama'=>'Sumbersari','jumlah'=>18],
+            ['nama'=>'Kaliwates', 'jumlah'=>12],
+            ['nama'=>'Patrang',   'jumlah'=>9],
+            ['nama'=>'Ambulu',    'jumlah'=>5],
+            ['nama'=>'Wuluhan',   'jumlah'=>3],
+            ['nama'=>'Pakusari',  'jumlah'=>2],
+        ]);
+        $maxSebaran = collect($sebaran)->max('jumlah');
+        @endphp
+        @foreach($sebaran as $kec)
+        @php
+        $jumlah = is_array($kec) ? $kec['jumlah'] : $kec->jumlah;
+        $nama   = is_array($kec) ? $kec['nama']   : $kec->nama;
+        $persen = $maxSebaran > 0 ? round(($jumlah / $maxSebaran) * 100) : 0;
+        @endphp
+        <div class="kecamatan-row">
+            <span class="kec-name">{{ $nama }}</span>
+            <div class="kec-bar-wrap"><div class="kec-bar" style="width:{{ $persen }}%"></div></div>
+            <span class="kec-count">{{ $jumlah }}</span>
+        </div>
+        @endforeach
+    </div>
+
+</div>
+
+<div class="dash-row dash-row-3">
+    <div class="summary-card">
+        <div class="summary-icon-wrap pink"><i class="mdi mdi-heart"></i></div>
+        <div class="summary-number">Rp {{ number_format($totalDonasi ?? 4200000, 0, ',', '.') }}</div>
+        <div class="summary-label">Total donasi masuk</div>
+        <div class="summary-sub">{{ $jumlahDonatur ?? 28 }} donatur &middot; bulan ini</div>
+        <a href="{{ route('admin.donasi.index') }}" class="dl-btn" title="Lihat detail">
+            <i class="mdi mdi-arrow-right"></i>
+        </a>
+    </div>
+    <div class="summary-card">
+        <div class="summary-icon-wrap red"><i class="mdi mdi-alert-outline"></i></div>
+        <div class="summary-number">{{ $butuhValidasi ?? 7 }}</div>
+        <div class="summary-label">Laporan butuh validasi</div>
+        <div class="summary-sub">Perlu ditindaklanjuti segera</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-icon-wrap green"><i class="mdi mdi-check-circle-outline"></i></div>
+        <div class="summary-number">{{ $rendahBulanIni ?? 19 }}</div>
+        <div class="summary-label">Laporan rendah bulan ini</div>
+        <div class="summary-sub">Dari total {{ $totalLaporan ?? 24 }} laporan masuk</div>
     </div>
 </div>
 
-{{-- Area Chart --}}
-<div class="row">
-    <div class="col-md-12 grid-margin stretch-card">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Tren Donasi Per Bulan</h4>
-                <div style="position:relative; height:250px; width:100%;">
-                    <canvas id="donasi-area-chart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- Tabel --}}
-<div class="row">
-    <div class="col-12 grid-margin">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Laporan Banjir Terbaru</h4>
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Pelapor</th>
-                                <th>Lokasi</th>
-                                <th>Status</th>
-                                <th>Tanggal</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">
-                                    <i class="mdi mdi-water-off mdi-36px d-block mb-2"></i>
-                                    Belum ada laporan masuk
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-@endsection
-
-@section('extra-js')
-<script src="{{ asset('assets_admin/vendors/chart.js/chart.umd.js') }}"></script>
-<script>
-$(function() {
-    // Bar Chart
-    if ($("#laporan-bar-chart").length) {
-        new Chart(document.getElementById('laporan-bar-chart'), {
-            type: 'bar',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags'],
-                datasets: [
-                    {
-                        label: 'Laporan Masuk',
-                        data: [5, 8, 3, 12, 7, 15, 9, 6],
-                        backgroundColor: 'rgba(232, 86, 42, 0.6)',
-                        borderColor: '#e8562a',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Laporan Selesai',
-                        data: [3, 5, 2, 8, 5, 10, 7, 4],
-                        backgroundColor: 'rgba(42, 186, 232, 0.6)',
-                        borderColor: '#2abae8',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true } }
-            }
-        });
-    }
-
-    // Doughnut Chart
-    if ($("#status-doughnut-chart").length) {
-        new Chart(document.getElementById('status-doughnut-chart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Menunggu', 'Diproses', 'Selesai', 'Ditolak'],
-                datasets: [{
-                    data: [10, 5, 20, 3],
-                    backgroundColor: ['#e8562a', '#2abae8', '#2abe8a', '#e8c42a'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: { legend: { position: 'bottom' } }
-            }
-        });
-    }
-
-    // Area Chart
-    if ($("#donasi-area-chart").length) {
-        new Chart(document.getElementById('donasi-area-chart'), {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags'],
-                datasets: [{
-                    label: 'Jumlah Donasi (Rp)',
-                    data: [500000, 1200000, 800000, 2000000, 1500000, 3000000, 2500000, 1800000],
-                    backgroundColor: 'rgba(232, 86, 42, 0.2)',
-                    borderColor: '#e8562a',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#e8562a',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true } }
-            }
-        });
-    }
-});
-</script>
 @endsection

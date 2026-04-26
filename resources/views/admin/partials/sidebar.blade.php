@@ -1,64 +1,65 @@
-<nav class="sidebar sidebar-offcanvas" id="sidebar">
-    <ul class="nav">
-        <li class="nav-item nav-profile">
-            <a href="#" class="nav-link">
-                <div class="nav-profile-image">
-                    <img src="{{ asset('assets_admin/images/faces/face1.jpg') }}" alt="profile" />
-                    <span class="login-status online"></span>
-                </div>
-                <div class="nav-profile-text d-flex flex-column">
-                    <span class="font-weight-bold mb-2">{{ Auth::user()->nama_lengkap }}</span>
-                    <span class="text-secondary text-small">{{ ucfirst(Auth::user()->role) }}</span>
-                </div>
-            </a>
-        </li>
+<aside class="fc-sidebar">
 
-        {{-- Dashboard --}}
-        <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('admin.dashboard') }}">
-                <span class="menu-title">Dashboard</span>
-                <i class="mdi mdi-home menu-icon"></i>
-            </a>
-        </li>
+    {{-- User Card --}}
+    <div class="fc-user-card">
+        <div class="fc-user-avatar">
+            {{ strtoupper(substr(Auth::user()->nama_lengkap, 0, 2)) }}
+        </div>
+        <div>
+            <div class="fc-user-name">{{ Auth::user()->nama_lengkap }}</div>
+            <div class="fc-user-role">{{ ucfirst(Auth::user()->role) }}</div>
+        </div>
+    </div>
 
-        {{-- Laporan Banjir --}}
-        <li class="nav-item {{ request()->routeIs('admin.laporan*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('admin.laporan.index') }}">
-                <span class="menu-title">Laporan Banjir</span>
-                <i class="mdi mdi-water menu-icon"></i>
-            </a>
-        </li>
+    {{-- UTAMA --}}
+    <div class="fc-nav-section">Utama</div>
 
-        {{-- Donasi --}}
-        <li class="nav-item {{ request()->routeIs('admin.donasi*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('admin.donasi.index') }}">
-                <span class="menu-title">Donasi</span>
-                <i class="mdi mdi-heart menu-icon"></i>
-            </a>
-        </li>
+    <a href="{{ route('admin.dashboard') }}"
+       class="fc-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+        <i class="mdi mdi-view-dashboard-outline"></i>
+        Dashboard
+    </a>
 
-        {{-- Artikel --}}
-        <li class="nav-item {{ request()->routeIs('admin.artikel*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('admin.artikel.index') }}">
-                <span class="menu-title">Artikel</span>
-                <i class="mdi mdi-newspaper menu-icon"></i>
-            </a>
-        </li>
+    <a href="{{ route('admin.laporan.index') }}"
+       class="fc-nav-link {{ request()->routeIs('admin.laporan*') ? 'active' : '' }}">
+        <i class="mdi mdi-water-outline"></i>
+        Laporan Banjir
+        @if(isset($laporanBaru) && $laporanBaru > 0)
+        <span class="fc-nav-badge">{{ $laporanBaru }}</span>
+        @endif
+    </a>
 
-        {{-- Video Edukasi --}}
-        <li class="nav-item {{ request()->routeIs('admin.video*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('admin.video.index') }}">
-                <span class="menu-title">Video Edukasi</span>
-                <i class="mdi mdi-video menu-icon"></i>
-            </a>
-        </li>
+    {{-- KONTEN --}}
+    <div class="fc-nav-section">Konten</div>
 
-        {{-- Kelola User --}}
-        <li class="nav-item {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-            <a class="nav-link" href="{{ route('admin.users.index') }}">
-                <span class="menu-title">Kelola User</span>
-                <i class="mdi mdi-account-multiple menu-icon"></i>
-            </a>
-        </li>
-    </ul>
-</nav>
+    <a href="{{ route('admin.artikel.index') }}"
+       class="fc-nav-link {{ request()->routeIs('admin.artikel*') ? 'active' : '' }}">
+        <i class="mdi mdi-newspaper-variant-outline"></i>
+        Artikel
+        @if(isset($artikelBaru) && $artikelBaru > 0)
+        <span class="fc-nav-badge">{{ $artikelBaru }}</span>
+        @endif
+    </a>
+
+    <a href="{{ route('admin.video.index') }}"
+       class="fc-nav-link {{ request()->routeIs('admin.video*') ? 'active' : '' }}">
+        <i class="mdi mdi-play-circle-outline"></i>
+        Video Edukasi
+    </a>
+
+    {{-- LAINNYA --}}
+    <div class="fc-nav-section">Lainnya</div>
+
+    <a href="{{ route('admin.donasi.index') }}"
+       class="fc-nav-link {{ request()->routeIs('admin.donasi*') ? 'active' : '' }}">
+        <i class="mdi mdi-heart-outline"></i>
+        Donasi
+    </a>
+
+    <a href="{{ route('admin.users.index') }}"
+       class="fc-nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
+        <i class="mdi mdi-account-group-outline"></i>
+        Kelola User
+    </a>
+
+</aside>
