@@ -19,29 +19,17 @@
 </div>
 
 @php
-$user = $user ?? (object)[
-    'nama_lengkap' => 'Ahmad Rizki',
-    'email'        => 'rizki.ahmad@gmail.com',
-    'no_telepon'   => '0878-1234-5678',
-    'role'         => 'masyarakat',
-    'provider'     => 'google',
-    'status'       => 'aktif',
-    'created_at'   => '10 April 2026',
-    'last_active'  => 'Hari ini, 09:42 WIB',
-    'id'           => 3,
-];
 $initials = strtoupper(substr($user->nama_lengkap, 0, 2));
 $colors   = ['#ff6600','#2a7de8','#2abe8a','#e8a82a','#9b59b6'];
 $color    = $colors[crc32($user->email) % count($colors)];
-
-$laporanUser = $laporanUser ?? collect([
-    ['no'=>1,'judul'=>'Banjir Jl. Mastrip',        'tinggi'=>60, 'risiko'=>'tinggi'],
-    ['no'=>2,'judul'=>'Genangan Jl. Veteran',       'tinggi'=>25, 'risiko'=>'sedang'],
-    ['no'=>3,'judul'=>'Banjir Sumbersari Barat',    'tinggi'=>12, 'risiko'=>'rendah'],
-    ['no'=>4,'judul'=>'Luapan Kali Jompo',          'tinggi'=>40, 'risiko'=>'sedang'],
-    ['no'=>5,'judul'=>'Genangan Perum Griya',       'tinggi'=>10, 'risiko'=>'rendah'],
-]);
 @endphp
+
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+    <i class="mdi mdi-check-circle me-2"></i> {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
 
 <div class="user-show-grid">
 
@@ -77,27 +65,18 @@ $laporanUser = $laporanUser ?? collect([
                     <div class="user-info-content">
                         <div class="user-info-label">Bergabung</div>
                         <div class="user-info-value">
-                            @if(is_string($user->created_at))
-                                {{ $user->created_at }}
-                            @else
-                                {{ $user->created_at->format('d F Y') }}
-                            @endif
+                            {{ $user->created_at ? $user->created_at->format('d F Y') : '—' }}
                         </div>
                     </div>
                 </div>
                 <div class="user-info-row">
-                    <div class="user-info-icon"><i class="mdi mdi-map-marker-outline"></i></div>
+                    <div class="user-info-icon"><i class="mdi mdi-clock-outline"></i></div>
                     <div class="user-info-content">
-                        <div class="user-info-label">Terakhir aktif</div>
-                        <div class="user-info-value">{{ $user->last_active ?? '—' }}</div>
+                        <div class="user-info-label">Terakhir update</div>
+                        <div class="user-info-value">
+                            {{ $user->updated_at ? $user->updated_at->format('d F Y, H:i') . ' WIB' : '—' }}
+                        </div>
                     </div>
-                </div>
-                <div class="user-info-row">
-                    <!-- <div class="user-info-icon"><i class="mdi mdi-shield-outline"></i></div>
-                    <div class="user-info-content">
-                        <div class="user-info-label">IP terakhir</div>
-                        <div class="user-info-value">{{ $user->ip_terakhir ?? '—' }}</div>
-                    </div> -->
                 </div>
             </div>
         </div>
@@ -113,21 +92,31 @@ $laporanUser = $laporanUser ?? collect([
                     onclick="document.getElementById('modal-role').style.display='flex'">
                     <i class="mdi mdi-account-convert-outline"></i> Ubah role
                 </button>
-                <form method="POST" action="#" class="fc-btn-full">
+
+                {{-- Nonaktifkan / Aktifkan --}}
+                <form method="POST" action="{{ route('admin.users.status', $user->id) }}" class="fc-btn-full">
                     @csrf @method('PATCH')
-                    <button type="submit" class="fc-btn fc-btn-warning"
-                        data-confirm="Yakin ingin {{ ($user->status ?? 'aktif') === 'aktif' ? 'nonaktifkan' : 'aktifkan' }} user ini?">
+                    <button type="submit" class="fc-btn fc-btn-warning">
                         <i class="mdi mdi-pause-circle-outline"></i>
-                        {{ ($user->status ?? 'aktif') === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}
+                        {{ $user->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}
                     </button>
                 </form>
-                <form method="POST" action="#" class="fc-btn-full">
+
+                {{-- Blokir --}}
+                @if($user->status !== 'diblokir')
+                <form method="POST" action="{{ route('admin.users.blokir', $user->id) }}" class="fc-btn-full"
+                    onsubmit="return confirm('Yakin ingin memblokir user ini?')">
                     @csrf @method('PATCH')
-                    <button type="submit" class="fc-btn fc-btn-danger"
-                        data-confirm="Yakin ingin memblokir user ini? Tindakan ini tidak bisa diurungkan.">
+                    <button type="submit" class="fc-btn fc-btn-danger">
                         <i class="mdi mdi-cancel"></i> Blokir user ini
                     </button>
                 </form>
+                @else
+                <div class="fc-btn fc-btn-danger" style="opacity:0.5; cursor:not-allowed;">
+                    <i class="mdi mdi-cancel"></i> User diblokir
+                </div>
+                @endif
+
             </div>
         </div>
 
@@ -143,7 +132,7 @@ $laporanUser = $laporanUser ?? collect([
                     <i class="mdi mdi-alert-circle-outline"></i>
                 </div>
                 <div>
-                    <div class="user-stat-mini-num">{{ $totalLaporan ?? 7 }}</div>
+                    <div class="user-stat-mini-num">{{ $totalLaporan }}</div>
                     <div class="user-stat-mini-label">Total laporan</div>
                 </div>
             </div>
@@ -152,13 +141,13 @@ $laporanUser = $laporanUser ?? collect([
                     <i class="mdi mdi-check-circle-outline"></i>
                 </div>
                 <div>
-                    <div class="user-stat-mini-num">{{ $totalKonfirmasi ?? 14 }}</div>
+                    <div class="user-stat-mini-num">{{ $totalKonfirmasi ?? 0 }}</div>
                     <div class="user-stat-mini-label">Konfirmasi laporan</div>
                 </div>
             </div>
         </div>
 
-        {{-- Tab: Laporan Banjir / Konfirmasi --}}
+        {{-- Tab --}}
         <div class="user-tab-card">
             <div class="user-tab-header">
                 <button class="user-tab-btn active" data-tab="laporan">Laporan banjir</button>
@@ -171,31 +160,32 @@ $laporanUser = $laporanUser ?? collect([
                     <table class="user-inner-table">
                         <thead>
                             <tr>
-                                <th width="6%">#</th>
+                                <th width="6%">No</th>
                                 <th>Judul laporan</th>
                                 <th width="14%">Tinggi air</th>
                                 <th width="14%">Risiko</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($laporanUser as $i => $lap)
+                            @forelse($laporanUser as $i => $lap)
                             @php
-                                $judul  = is_array($lap) ? $lap['judul']  : $lap->judul;
-                                $tinggi = is_array($lap) ? $lap['tinggi'] : $lap->tinggi_air;
-                                $risiko = is_array($lap) ? $lap['risiko'] : $lap->tingkat_risiko;
-                                $no     = is_array($lap) ? $lap['no']     : ($i + 1);
+                                $risiko = $lap->tingkat_risiko ?? 'rendah';
                             @endphp
                             <tr>
-                                <td class="user-no">{{ $no }}</td>
-                                <td class="user-nama">{{ $judul }}</td>
+                                <td class="user-no">{{ $i + 1 }}</td>
+                                <td class="user-nama">{{ $lap->judul }}</td>
                                 <td>
-                                    <span class="user-tinggi-{{ $risiko }}">{{ $tinggi }} cm</span>
+                                    <span class="user-tinggi-{{ $risiko }}">{{ $lap->tinggi_air ?? '—' }} cm</span>
                                 </td>
                                 <td>
                                     <span class="status-badge {{ $risiko }}">{{ ucfirst($risiko) }}</span>
                                 </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="4" class="fc-table-empty">Belum ada laporan</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -205,7 +195,7 @@ $laporanUser = $laporanUser ?? collect([
                     <table class="user-inner-table">
                         <thead>
                             <tr>
-                                <th width="6%">#</th>
+                                <th width="6%">No</th>
                                 <th>Laporan dikonfirmasi</th>
                                 <th width="20%">Tanggal</th>
                             </tr>
@@ -235,16 +225,19 @@ $laporanUser = $laporanUser ?? collect([
 {{-- Modal Ubah Role --}}
 <div id="modal-role" class="fc-modal-backdrop" style="display:none;">
     <div class="fc-modal-box">
-        <h3 class="fc-modal-title">Ubah Role</h3>
+        <button type="button" class="fc-btn fc-btn-ghost"
+            onclick="document.getElementById('modal-role').classList.add('open')">
+            <i class="mdi mdi-account-convert-outline"></i> Ubah role
+        </button>
         <p class="fc-modal-sub">Mengubah role untuk <strong>{{ $user->nama_lengkap }}</strong></p>
-        <form method="POST" action="#">
+        <form method="POST" action="{{ route('admin.users.role', $user->id) }}">
             @csrf @method('PATCH')
             <div class="fc-form-group">
                 <label class="fc-label">Role baru</label>
                 <select name="role" class="fc-select">
-                    <option value="masyarakat" {{ ($user->role ?? '') === 'masyarakat' ? 'selected' : '' }}>Masyarakat</option>
-                    <option value="admin"      {{ ($user->role ?? '') === 'admin'      ? 'selected' : '' }}>Admin</option>
-                    <option value="superadmin" {{ ($user->role ?? '') === 'superadmin' ? 'selected' : '' }}>Superadmin</option>
+                    <option value="masyarakat" {{ $user->role === 'masyarakat' ? 'selected' : '' }}>Masyarakat</option>
+                    <option value="admin"      {{ $user->role === 'admin'      ? 'selected' : '' }}>Admin</option>
+                    <option value="superadmin" {{ $user->role === 'superadmin' ? 'selected' : '' }}>Superadmin</option>
                 </select>
             </div>
             <div class="fc-modal-actions">

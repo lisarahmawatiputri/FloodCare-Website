@@ -3446,3 +3446,47 @@ body {
     .flp-stat-row    { grid-template-columns: repeat(2,1fr); }
     .flp-detail-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   MODAL UBAH ROLE
+   ============================================================ */
+.fc-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.fc-modal-backdrop.open {
+    display: flex !important;
+}
+
+.fc-modal-box {
+    background: white;
+    border-radius: 16px;
+    padding: 28px 24px;
+    width: 380px;
+    max-width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+}
+
+.fc-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.fc-modal-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+.fc-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}

@@ -9,7 +9,7 @@
         <h1 class="fc-page-title">Video Edukasi</h1>
         <p class="fc-page-subtitle">Kelola video edukasi penanggulangan banjir</p>
     </div>
-    <a href="#" class="fc-btn fc-btn-primary">
+    <a href="{{ route('admin.video.create') }}" class="fc-btn fc-btn-primary">
         <i class="mdi mdi-plus"></i> Tambah Video
     </a>
 </div>

@@ -288,9 +288,12 @@ document.querySelectorAll('.user-tab-btn').forEach(function(btn) {
 });
 
 // Tutup modal klik backdrop
-document.getElementById('modal-role').addEventListener('click', function(e) {
-    if (e.target === this) this.style.display = 'none';
-});
+var modalRole = document.getElementById('modal-role');
+if (modalRole) {
+    modalRole.addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+    });
+}
 
 /* ============================================================
    FloodCare Admin — Kelola User JavaScript
