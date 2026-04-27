@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\LaporanController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\UserController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +43,7 @@ Route::get('/starter-page', function () {
 */
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return view('admin.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -98,6 +100,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     | VIDEO
     |--------------------------------------------------------------------------
     */
+    
     Route::get('/video', function () {
         return view('admin.video.index');
     })->name('video.index');
@@ -106,18 +109,13 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         return view('admin.video.create');
     })->name('video.create');
 
-    /*
-    |--------------------------------------------------------------------------
-    | USERS
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/users', function () {
-        return view('admin.users.index');
-    })->name('users.index');
-
-    Route::get('/users/{id}', function ($id) {
-        return view('admin.users.show');
-    })->name('users.show');
+    
+// USERS
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
+Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
+Route::patch('/users/{id}/status', [UserController::class, 'updateStatus'])->name('users.status');
+Route::patch('/users/{id}/role', [UserController::class, 'updateRole'])->name('users.role');
+Route::patch('/users/{id}/blokir', [UserController::class, 'blokir'])->name('users.blokir');
 
 });
 
