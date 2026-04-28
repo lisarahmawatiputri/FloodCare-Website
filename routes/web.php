@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
 
@@ -61,7 +62,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         return view('admin.dashboard');
     })->name('dashboard');
 
-   
+
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/{id}', [LaporanController::class, 'show'])->name('laporan.show');
 
@@ -83,17 +84,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     | ARTIKEL
     |--------------------------------------------------------------------------
     */
-    Route::get('/artikel', function () {
-        return view('admin.artikel.index');
-    })->name('artikel.index');
-
-    Route::get('/artikel/create', function () {
-        return view('admin.artikel.create');
-    })->name('artikel.create');
-
-    Route::get('/artikel/{id}/edit', function ($id) {
-        return view('admin.artikel.edit');
-    })->name('artikel.edit');
+    Route::resource('artikel', ArtikelController::class)->except(['show']);
 
     /*
     |--------------------------------------------------------------------------
