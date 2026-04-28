@@ -8,7 +8,18 @@ return new class extends Migration
 {
     public function up(): void
     {
-
+if (!Schema::hasTable('users')) {
+            Schema::create('users', function (Blueprint $table) {
+                $table->id();
+                $table->string('nama_lengkap'); // Harus nama_lengkap sesuai error tadi
+                $table->string('email')->unique();
+                $table->string('no_telepon')->nullable();
+                $table->timestamp('email_verified_at')->nullable();
+                $table->string('password')->nullable();
+                $table->rememberToken();
+                $table->timestamps();
+            });
+}
         if (!Schema::hasTable('password_reset_tokens')) {
             Schema::create('password_reset_tokens', function (Blueprint $table) {
                 $table->string('email')->primary();
