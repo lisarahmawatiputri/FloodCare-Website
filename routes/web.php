@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\VideoController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
@@ -91,16 +92,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     | VIDEO
     |--------------------------------------------------------------------------
     */
-    
-    Route::get('/video', function () {
-        return view('admin.video.index');
-    })->name('video.index');
+    Route::resource('video', VideoController::class)->except(['show']);
 
-    Route::get('/video/create', function () {
-        return view('admin.video.create');
-    })->name('video.create');
 
-    
 // USERS
 Route::get('/users', [UserController::class, 'index'])->name('users.index');
 Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');

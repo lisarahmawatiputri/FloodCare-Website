@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah Video')
+@section('title', 'Edit Video')
 
 @section('content')
 
@@ -9,8 +9,8 @@
         <a href="{{ route('admin.video.index') }}" class="fc-breadcrumb-link">
             <i class="mdi mdi-arrow-left"></i> Kembali ke daftar video
         </a>
-        <h1 class="fc-page-title" style="margin-top:6px;">Tambah Video</h1>
-        <p class="fc-page-subtitle">Tambah video edukasi banjir baru</p>
+        <h1 class="fc-page-title" style="margin-top:6px;">Edit Video</h1>
+        <p class="fc-page-subtitle">Edit video edukasi banjir yang sudah ada</p>
     </div>
 </div>
 
@@ -29,8 +29,9 @@
 </div>
 @endif
 
-<form method="POST" action="{{ route('admin.video.store') }}" enctype="multipart/form-data" id="videoForm">
+<form method="POST" action="{{ route('admin.video.update', $video->id) }}" enctype="multipart/form-data" id="videoForm">
     @csrf
+    @method('PUT')
 
     <div class="fc-form-grid">
 
@@ -50,7 +51,7 @@
                     </label>
                     <input type="text" id="judul" name="judul"
                            class="fc-input @error('judul') fc-input-error @enderror"
-                           value="{{ old('judul') }}"
+                           value="{{ old('judul', $video->judul) }}"
                            placeholder="Masukkan judul video..."
                            maxlength="50">
                     <div class="fc-input-row-below">
@@ -59,7 +60,7 @@
                         @else
                             <span></span>
                         @enderror
-                        <span class="fc-char-count" id="judulCount">0/50</span>
+                        <span class="fc-char-count" id="judulCount">{{ strlen(old('judul', $video->judul)) }}/50</span>
                     </div>
                 </div>
 
@@ -129,7 +130,7 @@
                     <textarea id="deskripsi" name="deskripsi"
                               class="fc-input fc-textarea @error('deskripsi') fc-input-error @enderror"
                               placeholder="Deskripsi singkat tentang isi video..."
-                              rows="4">{{ old('deskripsi') }}</textarea>
+                              rows="4">{{ old('deskripsi', $video->deskripsi) }}</textarea>
                     @error('deskripsi')
                         <span class="fc-input-error-msg">{{ $message }}</span>
                     @enderror
@@ -195,7 +196,7 @@
                         <span class="fc-input-prefix"><i class="mdi mdi-clock-outline"></i></span>
                         <input type="number" id="durasi_detik" name="durasi_detik"
                                class="fc-input fc-input-prefixed @error('durasi_detik') fc-input-error @enderror"
-                               value="{{ old('durasi_detik') }}"
+                               value="{{ old('durasi_detik', $video->durasi_detik) }}"
                                placeholder="Otomatis dari video"
                                min="0">
                     </div>
@@ -210,9 +211,9 @@
             <div class="fc-card fc-form-card">
                 <h2 class="fc-form-section-title">Status publikasi</h2>
                 <div class="fc-status-options">
-                    <label class="fc-radio-card {{ old('status', 'draft') == 'draft' ? 'fc-radio-card-active' : '' }}">
+                    <label class="fc-radio-card {{ old('status', $video->status) == 'draft' ? 'fc-radio-card-active' : '' }}">
                         <input type="radio" name="status" value="draft"
-                               {{ old('status', 'draft') == 'draft' ? 'checked' : '' }}
+                               {{ old('status', $video->status) == 'draft' ? 'checked' : '' }}
                                onchange="updateStatusCard()">
                         <div class="fc-radio-card-content">
                             <i class="mdi mdi-file-outline fc-radio-icon" style="color:#856404;"></i>
@@ -222,9 +223,9 @@
                             </div>
                         </div>
                     </label>
-                    <label class="fc-radio-card {{ old('status') == 'published' ? 'fc-radio-card-active' : '' }}">
+                    <label class="fc-radio-card {{ old('status', $video->status) == 'published' ? 'fc-radio-card-active' : '' }}">
                         <input type="radio" name="status" value="published"
-                               {{ old('status') == 'published' ? 'checked' : '' }}
+                               {{ old('status', $video->status) == 'published' ? 'checked' : '' }}
                                onchange="updateStatusCard()">
                         <div class="fc-radio-card-content">
                             <i class="mdi mdi-earth fc-radio-icon" style="color:#0F6E56;"></i>
@@ -241,7 +242,7 @@
             <div class="fc-form-actions">
                 <button type="submit" class="fc-btn fc-btn-primary fc-btn-full">
                     <i class="mdi mdi-check-circle-outline"></i>
-                    Simpan video
+                    Perbarui video
                 </button>
                 <a href="{{ route('admin.video.index') }}" class="fc-btn fc-btn-ghost fc-btn-full">
                     Batal
