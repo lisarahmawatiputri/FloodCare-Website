@@ -79,13 +79,18 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         return view('admin.donasi.show');
     })->name('donasi.show');
 
-    /*
-    |--------------------------------------------------------------------------
-    | ARTIKEL
-    |--------------------------------------------------------------------------
-    */
-    Route::resource('artikel', ArtikelController::class)->except(['show']);
 
+// ARTIKEL 
+Route::prefix('artikel')->name('artikel.')->group(function () {
+    Route::get('/', [ArtikelController::class, 'index'])->name('index');
+    Route::get('/create', [ArtikelController::class, 'create'])->name('create');
+    Route::post('/', [ArtikelController::class, 'store'])->name('store');
+    Route::get('/{artikel}/edit', [ArtikelController::class, 'edit'])->name('edit');
+    Route::patch('/{artikel}', [ArtikelController::class, 'update'])->name('update');
+    Route::delete('/{artikel}', [ArtikelController::class, 'destroy'])->name('destroy');
+
+});
+    
     /*
     |--------------------------------------------------------------------------
     | VIDEO

@@ -4,92 +4,128 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Artikel;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ArtikelController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $artikels = Artikel::latest()->get();
+        $query = Artikel::latest();
+
+        if ($request->filled('search')) {
+            $query->where('judul', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $artikels = $query->paginate(10)->withQueryString();
+
         return view('admin.artikel.index', compact('artikels'));
     }
 
     public function create()
     {
-        $users = \App\Models\User::all();
-        return view('admin.artikel.create', compact('users'));
+        return view('admin.artikel.create');
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'url_link' => 'required|url|max:255',
-            'konten' => 'required|string',
-            'status' => 'required|in:draft,published,archived',
-            'user_id' => 'nullable|exists:users,id',
+        $request->validate([
+            'judul'     => 'required|string|max:255',
+            'slug'      => 'nullable|string|max:500',
+            'konten'    => 'required|string',
+            'penulis'   => 'nullable|string|max:100',
+            'status'    => 'required|in:draft,dipublikasi,diarsip',
             'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        if ($request->hasFile('thumbnail')) {
-            $validated['thumbnail'] = $request->file('thumbnail')->store('artikel', 'public');
+        $slug = $request->slug ?: Str::slug($request->judul);
+        $originalSlug = $slug;
+        $count = 1;
+        while (Artikel::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count++;
         }
 
-        $validated['user_id'] = $validated['user_id'] ?? Auth::id();
-        $validated['views'] = 0;
+        $thumbnailPath = null;
+        if ($request->hasFile('thumbnail')) {
+            $thumbnailPath = $request->file('thumbnail')->store('artikel', 'public');
+        }
 
-        Artikel::create($validated);
+        Artikel::create([
+            'judul'       => $request->judul,
+            'slug'        => $slug,
+            'konten'      => $request->konten,
+            'thumbnail'   => $thumbnailPath,
+            'penulis'     => $request->penulis,
+            'uploaded_by' => Auth::id(),
+            'status'      => $request->status,
+            'dilihat'     => 0,
+        ]);
 
-        return redirect()->route('admin.artikel.index')->with('success', 'Artikel berhasil ditambahkan.');
+        return redirect()->route('admin.artikel.index')
+            ->with('success', 'Artikel berhasil disimpan.');
     }
 
-    public function edit($id)
+    public function edit(Artikel $artikel)
     {
-        $artikel = Artikel::findOrFail($id);
-        $users = \App\Models\User::all();
-        return view('admin.artikel.edit', compact('artikel', 'users'));
+        return view('admin.artikel.edit', compact('artikel'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Artikel $artikel)
     {
-        $artikel = Artikel::findOrFail($id);
-
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'url_link' => 'required|url|max:255',
-            'konten' => 'required|string',
-            'status' => 'required|in:draft,published,archived',
-            'user_id' => 'nullable|exists:users,id',
+        $request->validate([
+            'judul'     => 'required|string|max:255',
+            'slug'      => 'nullable|string|max:500',
+            'konten'    => 'required|string',
+            'penulis'   => 'nullable|string|max:100',
+            'status'    => 'required|in:draft,dipublikasi,diarsip',
             'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
+        $slug = $artikel->slug;
+        if ($request->slug && $request->slug !== $artikel->slug) {
+            $newSlug = $request->slug;
+            $count = 1;
+            while (Artikel::where('slug', $newSlug)->where('id', '!=', $artikel->id)->exists()) {
+                $newSlug = $request->slug . '-' . $count++;
+            }
+            $slug = $newSlug;
+        }
+
+        $thumbnailPath = $artikel->thumbnail;
         if ($request->hasFile('thumbnail')) {
             if ($artikel->thumbnail) {
                 Storage::disk('public')->delete($artikel->thumbnail);
             }
-            $validated['thumbnail'] = $request->file('thumbnail')->store('artikel', 'public');
+            $thumbnailPath = $request->file('thumbnail')->store('artikel', 'public');
         }
 
-        $validated['user_id'] = $validated['user_id'] ?? $artikel->user_id ?? Auth::id();
+        $artikel->update([
+            'judul'     => $request->judul,
+            'slug'      => $slug,
+            'konten'    => $request->konten,
+            'thumbnail' => $thumbnailPath,
+            'penulis'   => $request->penulis,
+            'status'    => $request->status,
+        ]);
 
-        $artikel->update($validated);
-
-        return redirect()->route('admin.artikel.index')->with('success', 'Artikel berhasil diperbarui.');
+        return redirect()->route('admin.artikel.index')
+            ->with('success', 'Artikel berhasil diperbarui.');
     }
 
-    public function destroy($id)
+    public function destroy(Artikel $artikel)
     {
-        $artikel = Artikel::findOrFail($id);
-
         if ($artikel->thumbnail) {
             Storage::disk('public')->delete($artikel->thumbnail);
         }
-
         $artikel->delete();
 
-        return redirect()->route('admin.artikel.index')->with('success', 'Artikel berhasil dihapus.');
+        return redirect()->route('admin.artikel.index')
+            ->with('success', 'Artikel berhasil dihapus.');
     }
 }

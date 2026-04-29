@@ -18,6 +18,8 @@
 
     @yield('extra-css')
 </head>
+
+    @stack('scripts')
 <body>
 
     {{-- NAVBAR --}}
