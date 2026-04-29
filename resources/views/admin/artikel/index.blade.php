@@ -16,39 +16,41 @@
 </div>
 
 {{-- Filter & Search --}}
-<div class="fc-card fc-filter-card" style="margin-bottom: 12px;">
-    <div class="fc-filter-bar">
-        {{-- Search --}}
-        <div class="fc-search-wrap">
-            <i class="mdi mdi-magnify fc-search-icon"></i>
-            <input type="text" class="fc-input fc-search-input" placeholder="Cari judul artikel...">
+<form method="GET" action="{{ route('admin.artikel.index') }}" id="filter-form">
+    <div class="fc-card fc-filter-card" style="margin-bottom: 12px;">
+        <div class="fc-filter-bar">
+
+            {{-- Search --}}
+            <div class="fc-search-wrap">
+                <i class="mdi mdi-magnify fc-search-icon"></i>
+                <input type="text" name="search" class="fc-input fc-search-input"
+                       placeholder="Cari judul artikel..."
+                       value="{{ request('search') }}"
+                       oninput="debounceSearch()">
+            </div>
+
+            {{-- Divider --}}
+            <div class="fc-filter-divider"></div>
+
+            {{-- Status dropdown --}}
+            <div class="fc-status-select-wrap">
+                <select name="status" class="fc-input fc-select fc-status-select" onchange="this.form.submit()">
+                    <option value="">Semua status</option>
+                    <option value="dipublikasi" {{ request('status') == 'dipublikasi' ? 'selected' : '' }}>Dipublikasi</option>
+                    <option value="draft"       {{ request('status') == 'draft'       ? 'selected' : '' }}>Draft</option>
+                    <option value="diarsip"     {{ request('status') == 'diarsip'     ? 'selected' : '' }}>Diarsip</option>
+                </select>
+            </div>
+
+            {{-- Divider --}}
+            <div class="fc-filter-divider"></div>
+
+            {{-- Count --}}
+            <span class="fc-filter-count">{{ $artikels->total() }} artikel</span>
+
         </div>
-
-        {{-- Divider --}}
-        <div class="fc-filter-divider"></div>
-
-        {{-- Status dropdown --}}
-        <div class="fc-status-select-wrap">
-            <select class="fc-input fc-select fc-status-select">
-                <option value="">Semua status</option>
-                <option value="published">Dipublikasi</option>
-                <option value="draft">Draft</option>
-                <option value="archived">Diarsip</option>
-            </select>
-        </div>
-
-        {{-- Divider --}}
-        <div class="fc-filter-divider"></div>
-
-        <!-- {{-- Filter button --}}
-        <button class="fc-btn fc-btn-secondary fc-btn-filter">
-            <i class="mdi mdi-filter-outline"></i> Filter
-        </button> -->
-
-        {{-- Count --}}
-        <span class="fc-filter-count">{{ $artikels->count() }} artikel</span>
     </div>
-</div>
+</form>
 
 {{-- Table --}}
 <div class="fc-card fc-card-table">
@@ -67,51 +69,70 @@
             </thead>
             <tbody>
                 @forelse($artikels as $artikel)
-                    <tr>
-                        <td>
-                            <div class="fc-thumb">
-                                @if($artikel->thumbnail)
-                                    <img src="{{ asset('storage/' . $artikel->thumbnail) }}" alt="thumbnail" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">
-                                @else
-                                    <i class="mdi mdi-image-outline"></i>
-                                @endif
-                            </div>
-                        </td>
-                        <td>
-                            <div class="fc-table-title">{{ $artikel->judul }}</div>
-                            <div class="fc-table-meta">{{ Str::limit($artikel->konten, 60) }}</div>
-                        </td>
-                        <td><span class="fc-table-meta">{{ optional($artikel->user)->nama_lengkap ?? 'Admin' }}</span></td>
-                        <td><span class="fc-table-meta">{{ optional($artikel->created_at)->format('d M Y') ?? '-' }}</span></td>
-                        <td>
-                            <span class="fc-badge-status fc-badge-{{ $artikel->status }}">
-                                {{ $artikel->status === 'published' ? 'Dipublikasi' : ($artikel->status === 'draft' ? 'Draft' : 'Diarsip') }}
-                            </span>
-                        </td>
-                        <td><div class="fc-views"><i class="mdi mdi-eye-outline"></i> {{ $artikel->views ? number_format($artikel->views) : '—' }}</div></td>
-                        <td>
-                            <div class="fc-action-group">
-                                <a href="{{ route('admin.artikel.edit', $artikel->id) }}" class="fc-action-btn" title="Edit">
-                                    <i class="mdi mdi-pencil-outline"></i>
-                                </a>
-                                <form action="{{ route('admin.artikel.destroy', $artikel->id) }}" method="POST" onsubmit="return confirm('Hapus artikel ini?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="fc-action-btn fc-action-btn-danger" title="Hapus">
-                                        <i class="mdi mdi-trash-can-outline"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
+                <tr>
+                    <td>
+                        <div class="fc-thumb">
+                            @if($artikel->thumbnail)
+                                <img src="{{ asset('storage/' . $artikel->thumbnail) }}" alt="thumbnail"
+                                     style="width:100%; height:100%; object-fit:cover; border-radius:6px;">
+                            @else
+                                <i class="mdi mdi-image-outline"></i>
+                            @endif
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fc-table-title">{{ $artikel->judul }}</div>
+                        <div class="fc-table-meta">{{ Str::limit($artikel->konten, 60) }}</div>
+                    </td>
+                    <td>
+                        <div class="fc-table-title">{{ $artikel->penulis ?? '—' }}</div>
+                        <div class="fc-table-meta">Diupload: {{ optional($artikel->uploader)->nama_lengkap ?? '—' }}</div>
+                    </td>
+                    <td><span class="fc-table-meta">{{ $artikel->created_at->format('d M Y') }}</span></td>
+                    <td>
+                        <span class="fc-badge-status fc-badge-{{ $artikel->status }}">
+                            {{ $artikel->status === 'dipublikasi' ? 'Dipublikasi' : ($artikel->status === 'draft' ? 'Draft' : 'Diarsip') }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="fc-views">
+                            <i class="mdi mdi-eye-outline"></i>
+                            {{ $artikel->dilihat ? number_format($artikel->dilihat) : '—' }}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fc-action-group">
+                            <a href="{{ route('admin.artikel.edit', $artikel->id) }}" class="fc-action-btn" title="Edit">
+                                <i class="mdi mdi-pencil-outline"></i>
+                            </a>
+                            <form action="{{ route('admin.artikel.destroy', $artikel->id) }}" method="POST"
+                                  onsubmit="return confirm('Hapus artikel ini?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="fc-action-btn fc-action-btn-danger" title="Hapus">
+                                    <i class="mdi mdi-trash-can-outline"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
                 @empty
-                    <tr>
-                        <td colspan="7" class="text-center py-8 text-gray-500">Belum ada artikel. Buat artikel baru untuk menampilkannya di sini.</td>
-                    </tr>
+                <tr>
+                    <td colspan="7" class="text-center py-8 text-gray-500">
+                        Belum ada artikel. Buat artikel baru untuk menampilkannya di sini.
+                    </td>
+                </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
+
+    {{-- Pagination --}}
+    @if($artikels->hasPages())
+        <div style="padding: 16px 20px;">
+            {{ $artikels->links() }}
+        </div>
+    @endif
 </div>
 
 @endsection

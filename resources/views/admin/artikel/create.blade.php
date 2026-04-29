@@ -26,7 +26,7 @@
 
                 <div class="fc-form-group">
                     <label class="fc-label" for="judul">
-                        Judul artikel <span class="fc-required">*</span>
+                        Judul Artikel <span class="fc-required">*</span>
                     </label>
                     <input type="text" id="judul" name="judul"
                            class="fc-input @error('judul') fc-input-error @enderror"
@@ -38,18 +38,18 @@
                 </div>
 
                 <div class="fc-form-group">
-                    <label class="fc-label" for="url_link">
+                    <label class="fc-label" for="slug">
                         URL Link <span class="fc-required">*</span>
                     </label>
                     <div class="fc-input-prefix-wrap">
                         <span class="fc-input-prefix"><i class="mdi mdi-link-variant"></i></span>
-                        <input type="url" id="url_link" name="url_link"
-                               class="fc-input fc-input-prefixed @error('url_link') fc-input-error @enderror"
-                               value="{{ old('url_link') }}"
+                        <input type="url" id="slug" name="slug"
+                               class="fc-input fc-input-prefixed @error('slug') fc-input-error @enderror"
+                               value="{{ old('slug') }}"
                                placeholder="https://contoh.com/artikel/...">
                     </div>
                     <span class="fc-input-hint">Link artikel yang akan ditampilkan ke pengguna</span>
-                    @error('url_link')
+                    @error('slug')
                         <span class="fc-input-hint fc-hint-error">{{ $message }}</span>
                     @enderror
                 </div>
@@ -60,7 +60,7 @@
                     </label>
                     <textarea id="konten" name="konten"
                               class="fc-input fc-textarea @error('konten') fc-input-error @enderror"
-                              placeholder="Tulis isi artikel di sini...">{{ old('konten') }}</textarea>
+                              placeholder="Tulis ringkasan artikel di sini...">{{ old('konten') }}</textarea>
                     @error('konten')
                         <span class="fc-input-hint fc-hint-error">{{ $message }}</span>
                     @enderror
@@ -87,6 +87,9 @@
                        accept="image/jpeg,image/png,image/webp"
                        class="fc-file-hidden"
                        onchange="previewThumb(this)">
+                @error('thumbnail')
+                    <span class="fc-input-hint fc-hint-error">{{ $message }}</span>
+                @enderror
             </div>
 
             {{-- Status --}}
@@ -95,37 +98,34 @@
                 <h2 class="fc-form-section-title">Status</h2>
                 <div class="fc-status-group">
                     <label class="fc-status-opt {{ $selectedStatus == 'draft' ? 'active' : '' }}">
-                        <input type="radio" name="status" value="draft" {{ $selectedStatus == 'draft' ? 'checked' : '' }}
+                        <input type="radio" name="status" value="draft"
+                               {{ $selectedStatus == 'draft' ? 'checked' : '' }}
                                onchange="setStatus(this)">
                         <i class="mdi mdi-file-outline"></i> Draft
                     </label>
-                    <label class="fc-status-opt {{ $selectedStatus == 'published' ? 'active' : '' }}">
-                        <input type="radio" name="status" value="published" {{ $selectedStatus == 'published' ? 'checked' : '' }}
+                    <label class="fc-status-opt {{ $selectedStatus == 'dipublikasi' ? 'active' : '' }}">
+                        <input type="radio" name="status" value="dipublikasi"
+                               {{ $selectedStatus == 'dipublikasi' ? 'checked' : '' }}
                                onchange="setStatus(this)">
                         <i class="mdi mdi-check-circle-outline"></i> Dipublikasi
                     </label>
-                    <label class="fc-status-opt {{ $selectedStatus == 'archived' ? 'active' : '' }}">
-                        <input type="radio" name="status" value="archived" {{ $selectedStatus == 'archived' ? 'checked' : '' }}
+                    <label class="fc-status-opt {{ $selectedStatus == 'diarsip' ? 'active' : '' }}">
+                        <input type="radio" name="status" value="diarsip"
+                               {{ $selectedStatus == 'diarsip' ? 'checked' : '' }}
                                onchange="setStatus(this)">
                         <i class="mdi mdi-archive-outline"></i> Diarsip
                     </label>
                 </div>
-                @error('status')
-                    <span class="fc-input-hint fc-hint-error">{{ $message }}</span>
-                @enderror
             </div>
 
             {{-- Penulis --}}
             <div class="fc-card fc-form-card">
                 <h2 class="fc-form-section-title">Penulis</h2>
-                <select name="user_id" class="fc-input fc-select">
-                    <option value="">Pilih penulis...</option>
-                    <option value="1">Lisa Rahmawati</option>
-                    <option value="2">Ahmad Fauzi</option>
-                    <option value="3">Siti Aisyah</option>
-                    <option value="4">Dr. Hendra K.</option>
-                </select>
-                @error('user_id')
+                <input type="text" name="penulis"
+                       class="fc-input @error('penulis') fc-input-error @enderror"
+                       value="{{ old('penulis') }}"
+                       placeholder="Nama penulis artikel...">
+                @error('penulis')
                     <span class="fc-input-hint fc-hint-error">{{ $message }}</span>
                 @enderror
             </div>
@@ -133,8 +133,7 @@
             {{-- Actions --}}
             <div class="fc-form-actions">
                 <button type="submit" class="fc-btn fc-btn-primary fc-btn-full">
-                    <i class="mdi mdi-content-save-outline"></i>
-                    Simpan Artikel
+                    <i class="mdi mdi-content-save-outline"></i> Simpan Artikel
                 </button>
                 <a href="{{ route('admin.artikel.index') }}" class="fc-btn fc-btn-secondary fc-btn-full">
                     Batal
@@ -145,24 +144,5 @@
     </div>
 </form>
 
-@push('scripts')
-<script>
-function previewThumb(input) {
-    if (!input.files || !input.files[0]) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        document.getElementById('thumb-preview').src = e.target.result;
-        document.getElementById('thumb-preview').style.display = 'block';
-        document.getElementById('thumb-placeholder').style.display = 'none';
-    };
-    reader.readAsDataURL(input.files[0]);
-}
-
-function setStatus(radio) {
-    document.querySelectorAll('.fc-status-opt').forEach(el => el.classList.remove('active'));
-    radio.closest('.fc-status-opt').classList.add('active');
-}
-</script>
-@endpush
 
 @endsection

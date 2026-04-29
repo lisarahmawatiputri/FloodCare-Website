@@ -11,12 +11,13 @@ return new class extends Migration
         Schema::create('artikel', function (Blueprint $table) {
             $table->id();
             $table->string('judul');
-            $table->string('url_link');
+            $table->string('slug')->nullable();
             $table->text('konten');
             $table->string('thumbnail')->nullable();
-            $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('views')->default(0);
+            $table->string('penulis')->nullable();
+            $table->unsignedBigInteger('uploaded_by')->nullable();
+            $table->enum('status', ['draft', 'dipublikasi', 'diarsip'])->default('draft');
+            $table->unsignedBigInteger('dilihat')->default(0);
             $table->timestamps();
         });
     }
