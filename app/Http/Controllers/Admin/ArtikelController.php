@@ -64,7 +64,6 @@ class ArtikelController extends Controller
             'penulis'     => $request->penulis,
             'uploaded_by' => Auth::id(),
             'status'      => $request->status,
-            'dilihat'     => 0,
         ]);
 
         return redirect()->route('admin.artikel.index')

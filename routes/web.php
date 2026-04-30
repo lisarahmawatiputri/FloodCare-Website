@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VideoController;
 
 
 /*
@@ -88,7 +89,6 @@ Route::prefix('artikel')->name('artikel.')->group(function () {
     Route::get('/{artikel}/edit', [ArtikelController::class, 'edit'])->name('edit');
     Route::patch('/{artikel}', [ArtikelController::class, 'update'])->name('update');
     Route::delete('/{artikel}', [ArtikelController::class, 'destroy'])->name('destroy');
-
 });
     
     /*
@@ -97,14 +97,16 @@ Route::prefix('artikel')->name('artikel.')->group(function () {
     |--------------------------------------------------------------------------
     */
     
-    Route::get('/video', function () {
-        return view('admin.video.index');
-    })->name('video.index');
+    Route::prefix('video')->name('video.')->group(function () {
+    Route::get('/', [VideoController::class, 'index'])->name('index');
+    Route::get('/create', [VideoController::class, 'create'])->name('create');
+    Route::post('/', [VideoController::class, 'store'])->name('store');
+    Route::get('/{video}/edit', [VideoController::class, 'edit'])->name('edit');
+    Route::patch('/{video}', [VideoController::class, 'update'])->name('update');
+    Route::delete('/{video}', [VideoController::class, 'destroy'])->name('destroy');
+    Route::post('/video/{video}/view', [VideoController::class, 'addView']);
 
-    Route::get('/video/create', function () {
-        return view('admin.video.create');
-    })->name('video.create');
-
+    });
     
 // USERS
 Route::get('/users', [UserController::class, 'index'])->name('users.index');
