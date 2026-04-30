@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('penulis')->nullable();
             $table->unsignedBigInteger('uploaded_by')->nullable();
             $table->enum('status', ['draft', 'dipublikasi', 'diarsip'])->default('draft');
-            $table->unsignedBigInteger('dilihat')->default(0);
             $table->timestamps();
         });
     }

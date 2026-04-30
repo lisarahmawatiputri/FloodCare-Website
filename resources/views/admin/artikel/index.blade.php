@@ -63,7 +63,6 @@
                     <th>Penulis</th>
                     <th>Tanggal</th>
                     <th>Status</th>
-                    <th>Ditampilkan</th>
                     <th style="width:90px; text-align:center;">Aksi</th>
                 </tr>
             </thead>
