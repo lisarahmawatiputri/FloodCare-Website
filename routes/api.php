@@ -31,3 +31,5 @@ Route::post('/reset-password', [ForgotPasswordOtpController::class, 'resetPasswo
 Route::middleware('auth:sanctum')->post('/donations/pay', [DonationPaymentController::class, 'createPayment']);
 Route::post('/midtrans/notification', [DonationPaymentController::class, 'notification']);
 Route::get('/program-donasi', [ProgramDonasiController::class, 'index']);
+//simulasi pembayaran aja masih lokal hehe
+Route::post('/donasi/{id}/simulate-success', [DonationPaymentController::class, 'simulateSuccess']);
