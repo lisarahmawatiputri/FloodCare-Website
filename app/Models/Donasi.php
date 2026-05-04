@@ -23,4 +23,40 @@ class Donasi extends Model
         'snap_token',
         'snap_url',
     ];
+
+    protected $casts = [
+        'is_anonymous' => 'boolean',
+        'paid_at' => 'datetime',
+        'nominal' => 'decimal:2',
+    ];
+
+    public function program()
+    {
+        return $this->belongsTo(ProgramDonasi::class, 'program_donasi_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match ($this->status_pembayaran) {
+            'sukses', 'success' => 'Sukses',
+            'menunggu', 'pending' => 'Menunggu',
+            'gagal', 'failed' => 'Gagal',
+            default => ucfirst($this->status_pembayaran ?? '-'),
+        };
+    }
+
+    public function getStatusColorAttribute(): string
+    {
+        return match ($this->status_pembayaran) {
+            'sukses', 'success' => 'success',
+            'menunggu', 'pending' => 'warning',
+            'gagal', 'failed' => 'danger',
+            default => 'secondary',
+        };
+    }
 }

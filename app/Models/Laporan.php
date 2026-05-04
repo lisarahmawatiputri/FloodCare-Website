@@ -6,10 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class Laporan extends Model
 {
-    protected $table = 'laporan_banjir'; 
+    protected $table = 'laporan';
+
     protected $fillable = [
         'judul',
         'isi',
-        'user_id'
+        'deskripsi',
+        'lokasi',
+        'foto',
+        'status',
+        'user_id',
+        'nama',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\DonasiController;
+use App\Http\Controllers\Admin\ProgramDonasiController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
@@ -72,13 +74,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     | DONASI
     |--------------------------------------------------------------------------
     */
-    Route::get('/donasi', function () {
-        return view('admin.donasi.index');
-    })->name('donasi.index');
+    Route::get('/donasi', [DonasiController::class, 'index'])->name('donasi.index');
+    Route::get('/donasi/create', [ProgramDonasiController::class, 'create'])->name('donasi.create');
+    Route::get('/donasi-program', [DonasiController::class, 'program'])->name('donasi.program');
+    Route::get('/donasi-transaksi', [DonasiController::class, 'transaksi'])->name('donasi.transaksi');
+    Route::get('/donasi/{id}', [DonasiController::class, 'show'])->whereNumber('id')->name('donasi.show');
+    Route::patch('/donasi/{id}/status/{status}', [DonasiController::class, 'updateStatus'])->whereNumber('id')->name('donasi.updateStatus');
 
-    Route::get('/donasi/{id}', function ($id) {
-        return view('admin.donasi.show');
-    })->name('donasi.show');
+    Route::post('/donasi/program', [ProgramDonasiController::class, 'store'])->name('donasi.store');
+    Route::put('/donasi/program/{id}', [ProgramDonasiController::class, 'update'])->whereNumber('id')->name('donasi.update');
+    Route::delete('/donasi/program/{id}', [ProgramDonasiController::class, 'destroy'])->whereNumber('id')->name('donasi.destroy');
 
 
 // ARTIKEL 
