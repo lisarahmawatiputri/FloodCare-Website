@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\ForgotPasswordOtpController;
 use App\Http\Controllers\Api\DonationPaymentController;
 use App\Http\Controllers\Api\ProgramDonasiController;
+use App\Http\Controllers\Api\ArtikelController;
 
 // PUBLIC (tidak perlu login)
 Route::post('/register', [AuthController::class, 'register']);
@@ -33,3 +34,5 @@ Route::post('/midtrans/notification', [DonationPaymentController::class, 'notifi
 Route::get('/program-donasi', [ProgramDonasiController::class, 'index']);
 //simulasi pembayaran aja masih lokal hehe
 Route::post('/donasi/{id}/simulate-success', [DonationPaymentController::class, 'simulateSuccess']);
+
+Route::get('/artikel', [ArtikelController::class, 'index']);
