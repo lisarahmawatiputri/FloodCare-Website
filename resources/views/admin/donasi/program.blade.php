@@ -8,6 +8,7 @@
     {{-- HEADER --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold"> Kelola Program Donasi</h4>
+        <h4 class="fw-bold">📦 Kelola Program Donasi</h4>
 
         <a href="{{ route('admin.donasi.index') }}"
            class="btn text-white"

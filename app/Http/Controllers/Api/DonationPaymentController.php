@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
-
+use App\Models\Donasi;
+use App\Models\ProgramDonasi;
 class DonationPaymentController extends Controller
 {
     public function createPayment(Request $request)
@@ -151,5 +152,30 @@ class DonationPaymentController extends Controller
             'status' => $status,
         ]);
     });
+}
+public function simulateSuccess($id)
+{
+    $donasi = Donasi::findOrFail($id);
+
+    if ($donasi->status_pembayaran === 'sukses') {
+        return response()->json([
+            'message' => 'Donasi sudah pernah diproses',
+        ]);
+    }
+
+    DB::transaction(function () use ($donasi) {
+        $donasi->update([
+            'status_pembayaran' => 'sukses',
+            'paid_at' => now(),
+        ]);
+
+        ProgramDonasi::where('id', $donasi->program_donasi_id)
+            ->increment('terkumpul', $donasi->nominal);
+    });
+
+    return response()->json([
+        'message' => 'Donasi berhasil disimulasikan',
+        'donasi' => $donasi->fresh(),
+    ]);
 }
 }

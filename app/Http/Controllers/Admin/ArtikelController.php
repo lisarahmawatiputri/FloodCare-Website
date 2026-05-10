@@ -44,6 +44,7 @@ class ArtikelController extends Controller
             'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
+        // Logic Slug
         $slug = $request->slug ?: Str::slug($request->judul);
         $originalSlug = $slug;
         $count = 1;
@@ -51,16 +52,21 @@ class ArtikelController extends Controller
             $slug = $originalSlug . '-' . $count++;
         }
 
-        $thumbnailPath = null;
+        // --- PERBAIKAN LOGIC UPLOAD ---
+        $thumbnailName = null;
         if ($request->hasFile('thumbnail')) {
-            $thumbnailPath = $request->file('thumbnail')->store('artikel', 'public');
+            $file = $request->file('thumbnail');
+            // Buat nama file unik (misal: 1715123456.jpg)
+            $thumbnailName = time() . '.' . $file->getClientOriginalExtension();
+            // Simpan file ke folder fisik: storage/app/public/foto_thumbnail
+            $file->storeAs('foto_thumbnail', $thumbnailName, 'public');
         }
 
         Artikel::create([
             'judul'       => $request->judul,
             'slug'        => $slug,
             'konten'      => $request->konten,
-            'thumbnail'   => $thumbnailPath,
+            'thumbnail'   => $thumbnailName, // Hanya simpan nama file
             'penulis'     => $request->penulis,
             'uploaded_by' => Auth::id(),
             'status'      => $request->status,
@@ -86,6 +92,7 @@ class ArtikelController extends Controller
             'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
+        // Logic Slug Update
         $slug = $artikel->slug;
         if ($request->slug && $request->slug !== $artikel->slug) {
             $newSlug = $request->slug;
@@ -96,19 +103,24 @@ class ArtikelController extends Controller
             $slug = $newSlug;
         }
 
-        $thumbnailPath = $artikel->thumbnail;
+        // --- PERBAIKAN LOGIC UPLOAD UPDATE ---
+        $thumbnailName = $artikel->thumbnail;
         if ($request->hasFile('thumbnail')) {
+            // Hapus foto lama jika ada
             if ($artikel->thumbnail) {
-                Storage::disk('public')->delete($artikel->thumbnail);
+                Storage::disk('public')->delete('foto_thumbnail/' . $artikel->thumbnail);
             }
-            $thumbnailPath = $request->file('thumbnail')->store('artikel', 'public');
+
+            $file = $request->file('thumbnail');
+            $thumbnailName = time() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('foto_thumbnail', $thumbnailName, 'public');
         }
 
         $artikel->update([
             'judul'     => $request->judul,
             'slug'      => $slug,
             'konten'    => $request->konten,
-            'thumbnail' => $thumbnailPath,
+            'thumbnail' => $thumbnailName,
             'penulis'   => $request->penulis,
             'status'    => $request->status,
         ]);
@@ -120,7 +132,8 @@ class ArtikelController extends Controller
     public function destroy(Artikel $artikel)
     {
         if ($artikel->thumbnail) {
-            Storage::disk('public')->delete($artikel->thumbnail);
+            // Hapus file fisik dari folder foto_thumbnail
+            Storage::disk('public')->delete('foto_thumbnail/' . $artikel->thumbnail);
         }
         $artikel->delete();
 
