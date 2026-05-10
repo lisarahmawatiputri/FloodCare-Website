@@ -35,7 +35,7 @@
 
                         @php
                             $persen = ($p->target_dana > 0)
-                                ? min(100, ($p->terkumpul / $p->target_dana) * 100
+                                ? min(100, ($p->terkumpul / $p->target_dana) * 100)
                                 : 0;
                         @endphp
 
