@@ -6,7 +6,7 @@
 
 <div class="fc-page-header">
     <h1>Dashboard</h1>
-    <p>{{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM Y') }}</p>
+    <!-- <p>{{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM Y') }}</p> -->
 </div>
 
 <div class="stat-grid">

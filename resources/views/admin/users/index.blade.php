@@ -14,7 +14,7 @@
         <h1>Kelola User</h1>
     </div>
     <div style="display:flex; gap:10px;">
-        <a href="#" class="fc-btn fc-btn-ghost">
+        <a href="{{ route('admin.users.export', request()->query()) }}" class="fc-btn fc-btn-ghost">
             <i class="mdi mdi-download-outline"></i> Export
         </a>
         <!-- <a href="#" class="fc-btn fc-btn-primary">

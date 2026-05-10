@@ -8,6 +8,9 @@ use App\Http\Controllers\Api\ForgotPasswordOtpController;
 use App\Http\Controllers\Api\DonationPaymentController;
 use App\Http\Controllers\Api\ProgramDonasiController;
 use App\Http\Controllers\Api\ArtikelController;
+use App\Http\Controllers\Api\VideoController;
+use App\Http\Controllers\Api\ArtikelController;
+
 
 // PUBLIC (tidak perlu login)
 Route::post('/register', [AuthController::class, 'register']);
@@ -32,7 +35,10 @@ Route::post('/reset-password', [ForgotPasswordOtpController::class, 'resetPasswo
 Route::middleware('auth:sanctum')->post('/donations/pay', [DonationPaymentController::class, 'createPayment']);
 Route::post('/midtrans/notification', [DonationPaymentController::class, 'notification']);
 Route::get('/program-donasi', [ProgramDonasiController::class, 'index']);
-//simulasi pembayaran aja masih lokal hehe
 Route::post('/donasi/{id}/simulate-success', [DonationPaymentController::class, 'simulateSuccess']);
 
 Route::get('/artikel', [ArtikelController::class, 'index']);
+Route::get('/video', [VideoController::class, 'index']); 
+=======
+//simulasi pembayaran aja masih lokal hehe
+Route::post('/donasi/{id}/simulate-success', [DonationPaymentController::class, 'simulateSuccess']);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UserController extends Controller
 {
@@ -71,4 +72,27 @@ class UserController extends Controller
         $user->save();
         return back()->with('success', 'User berhasil diblokir!');
     }
+
+    public function export(Request $request)
+{
+    $query = User::query();
+
+    if ($request->search) {
+        $query->where(function($q) use ($request) {
+            $q->where('nama_lengkap', 'like', '%'.$request->search.'%')
+              ->orWhere('email', 'like', '%'.$request->search.'%');
+        });
+    }
+
+    if ($request->role)     $query->where('role', $request->role);
+    if ($request->status)   $query->where('status', $request->status);
+    if ($request->provider) $query->where('provider', $request->provider);
+
+    $users = $query->orderBy('nama_lengkap')->get();
+
+    $pdf = Pdf::loadView('admin.users.pdf', compact('users'))
+               ->setPaper('a4', 'landscape');
+
+    return $pdf->download('data-user-floodcare.pdf');
+}
 }
