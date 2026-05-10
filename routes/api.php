@@ -7,6 +7,11 @@ use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\ForgotPasswordOtpController;
 use App\Http\Controllers\Api\DonationPaymentController;
 use App\Http\Controllers\Api\ProgramDonasiController;
+<<<<<<< Updated upstream
+=======
+use App\Http\Controllers\Api\ArtikelController;
+use App\Http\Controllers\Api\VideoController;
+>>>>>>> Stashed changes
 
 // PUBLIC (tidak perlu login)
 Route::post('/register', [AuthController::class, 'register']);
@@ -31,3 +36,10 @@ Route::post('/reset-password', [ForgotPasswordOtpController::class, 'resetPasswo
 Route::middleware('auth:sanctum')->post('/donations/pay', [DonationPaymentController::class, 'createPayment']);
 Route::post('/midtrans/notification', [DonationPaymentController::class, 'notification']);
 Route::get('/program-donasi', [ProgramDonasiController::class, 'index']);
+<<<<<<< Updated upstream
+=======
+Route::post('/donasi/{id}/simulate-success', [DonationPaymentController::class, 'simulateSuccess']);
+
+Route::get('/artikel', [ArtikelController::class, 'index']);
+Route::get('/video', [VideoController::class, 'index']); 
+>>>>>>> Stashed changes

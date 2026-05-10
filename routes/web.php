@@ -110,6 +110,7 @@ Route::prefix('artikel')->name('artikel.')->group(function () {
     
 // USERS
 Route::get('/users', [UserController::class, 'index'])->name('users.index');
+Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
 Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
 Route::patch('/users/{id}/status', [UserController::class, 'updateStatus'])->name('users.status');
 Route::patch('/users/{id}/role', [UserController::class, 'updateRole'])->name('users.role');

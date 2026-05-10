@@ -44,6 +44,6 @@
     <script src="{{ asset('assets_admin/js/floodcare.js') }}"></script>
 
     @yield('extra-js')
-
+    
 </body>
 </html>

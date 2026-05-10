@@ -41,7 +41,7 @@ class VideoController extends Controller
             'file_video'   => 'required|file|mimes:mp4,mov,avi|max:512000',
             'thumbnail'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'durasi_detik' => 'nullable|integer|min:0',
-            'status'       => 'required|in:draft,dipublikasi,diarsip',
+            'status'       => 'required|in:draft,published,diarsip',
         ]);
 
         $videoPath = $request->file('file_video')->store('video_edukasi', 'public');
