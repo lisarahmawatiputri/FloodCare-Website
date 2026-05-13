@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\DonationPaymentController;
 use App\Http\Controllers\Api\ProgramDonasiController;
 use App\Http\Controllers\Api\ArtikelController;
 use App\Http\Controllers\Api\VideoController;
+use App\Http\Controllers\Api\ArtikelController;
+
 
 // PUBLIC (tidak perlu login)
 Route::post('/register', [AuthController::class, 'register']);

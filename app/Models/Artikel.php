@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Artikel extends Model
 {
@@ -14,16 +13,21 @@ class Artikel extends Model
 
     protected $fillable = [
         'judul',
-        'url_link',
+        'slug',
         'konten',
         'thumbnail',
+        'penulis',
+        'uploaded_by',
         'status',
-        'user_id',
-        'views',
+        'dilihat',
     ];
 
-    public function user()
+    protected $casts = [
+        'dilihat' => 'integer',
+    ];
+
+    public function uploader()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'uploaded_by');
     }
 }

@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\DonasiController;
+use App\Http\Controllers\Admin\ProgramDonasiController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\VideoController;
 
 
 /*
@@ -73,35 +76,44 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     | DONASI
     |--------------------------------------------------------------------------
     */
-    Route::get('/donasi', function () {
-        return view('admin.donasi.index');
-    })->name('donasi.index');
+    Route::get('/donasi', [DonasiController::class, 'index'])->name('donasi.index');
+    Route::get('/donasi/create', [ProgramDonasiController::class, 'create'])->name('donasi.create');
+    Route::get('/donasi-program', [DonasiController::class, 'program'])->name('donasi.program');
+    Route::get('/donasi-transaksi', [DonasiController::class, 'transaksi'])->name('donasi.transaksi');
+    Route::get('/donasi/{id}', [DonasiController::class, 'show'])->whereNumber('id')->name('donasi.show');
+    Route::patch('/donasi/{id}/status/{status}', [DonasiController::class, 'updateStatus'])->whereNumber('id')->name('donasi.updateStatus');
 
-    Route::get('/donasi/{id}', function ($id) {
-        return view('admin.donasi.show');
-    })->name('donasi.show');
+    Route::post('/donasi/program', [ProgramDonasiController::class, 'store'])->name('donasi.store');
+    Route::put('/donasi/program/{id}', [ProgramDonasiController::class, 'update'])->whereNumber('id')->name('donasi.update');
+    Route::delete('/donasi/program/{id}', [ProgramDonasiController::class, 'destroy'])->whereNumber('id')->name('donasi.destroy');
 
-    /*
-    |--------------------------------------------------------------------------
-    | ARTIKEL
-    |--------------------------------------------------------------------------
-    */
-    Route::resource('artikel', ArtikelController::class)->except(['show']);
 
+// ARTIKEL 
+Route::prefix('artikel')->name('artikel.')->group(function () {
+    Route::get('/', [ArtikelController::class, 'index'])->name('index');
+    Route::get('/create', [ArtikelController::class, 'create'])->name('create');
+    Route::post('/', [ArtikelController::class, 'store'])->name('store');
+    Route::get('/{artikel}/edit', [ArtikelController::class, 'edit'])->name('edit');
+    Route::patch('/{artikel}', [ArtikelController::class, 'update'])->name('update');
+    Route::delete('/{artikel}', [ArtikelController::class, 'destroy'])->name('destroy');
+});
+    
     /*
     |--------------------------------------------------------------------------
     | VIDEO
     |--------------------------------------------------------------------------
     */
     
-    Route::get('/video', function () {
-        return view('admin.video.index');
-    })->name('video.index');
+    Route::prefix('video')->name('video.')->group(function () {
+    Route::get('/', [VideoController::class, 'index'])->name('index');
+    Route::get('/create', [VideoController::class, 'create'])->name('create');
+    Route::post('/', [VideoController::class, 'store'])->name('store');
+    Route::get('/{video}/edit', [VideoController::class, 'edit'])->name('edit');
+    Route::patch('/{video}', [VideoController::class, 'update'])->name('update');
+    Route::delete('/{video}', [VideoController::class, 'destroy'])->name('destroy');
+    Route::post('/video/{video}/view', [VideoController::class, 'addView']);
 
-    Route::get('/video/create', function () {
-        return view('admin.video.create');
-    })->name('video.create');
-
+    });
     
     // ===== USERS =====
     Route::get('/users',              [UserController::class, 'index'])->name('users.index');
