@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UserController extends Controller
 {
@@ -34,18 +37,101 @@ class UserController extends Controller
         ));
     }
 
-    public function show($id)
+    /**
+     * Buat akun admin baru
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama_lengkap' => ['required', 'string', 'max:255'],
+            'email'        => ['required', 'email', 'unique:users,email'],
+            'no_telepon'   => ['nullable', 'string', 'max:20'],
+            'password'     => ['required', 'confirmed', Password::min(8)],
+        ], [
+            'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
+            'email.required'        => 'Email wajib diisi.',
+            'email.email'           => 'Format email tidak valid.',
+            'email.unique'          => 'Email sudah terdaftar.',
+            'password.required'     => 'Password wajib diisi.',
+            'password.confirmed'    => 'Konfirmasi password tidak cocok.',
+            'password.min'          => 'Password minimal 8 karakter.',
+        ]);
+
+        User::create([
+            'nama_lengkap' => $request->nama_lengkap,
+            'email'        => $request->email,
+            'no_telepon'   => $request->no_telepon,
+            'password'     => Hash::make($request->password),
+            'role'         => 'admin',
+            'provider'     => 'email',
+            'status'       => 'aktif',
+        ]);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Akun admin berhasil dibuat!');
+    }
+
+   public function show($id)
+{
+    $user = User::findOrFail($id);
+
+    if ($user->role === 'masyarakat') {
+        $laporanUser     = $user->laporan()->latest()->get();
+        $konfirmasiUser  = collect([]);
+        $totalLaporan    = $laporanUser->count();
+        $totalKonfirmasi = 0;
+
+    } elseif ($user->role === 'admin') {
+        $laporanUser     = collect([]);
+        $konfirmasiUser  = $user->konfirmasi()->with('laporan')->latest()->get();
+        $totalLaporan    = 0;
+        $totalKonfirmasi = $konfirmasiUser->count();
+
+    } else {
+        // superadmin
+        $laporanUser     = $user->laporan()->latest()->get();
+        $konfirmasiUser  = $user->konfirmasi()->with('laporan')->latest()->get();
+        $totalLaporan    = $laporanUser->count();
+        $totalKonfirmasi = $konfirmasiUser->count();
+    }
+
+    return view('admin.users.show', compact(
+        'user', 'laporanUser', 'konfirmasiUser', 'totalLaporan', 'totalKonfirmasi'
+    ));
+}
+
+    /**
+     * Update profil user (dari modal edit di halaman show)
+     */
+    public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
 
-        $laporanUser     = $user->laporan()->latest()->get();
-        // $konfirmasiUser  = $user->konfirmasi()->latest()->get();
-        $totalLaporan    = $laporanUser->count();
-        // $totalKonfirmasi = $konfirmasiUser->count();
+        $request->validate([
+            'nama_lengkap' => ['required', 'string', 'max:255'],
+            'email'        => ['required', 'email', 'unique:users,email,' . $user->id],
+            'no_telepon'   => ['nullable', 'string', 'max:20'],
+            'password'     => ['nullable', 'string', Password::min(8)],
+        ], [
+            'nama_lengkap.required' => 'Nama lengkap wajib diisi.',
+            'email.required'        => 'Email wajib diisi.',
+            'email.email'           => 'Format email tidak valid.',
+            'email.unique'          => 'Email sudah digunakan akun lain.',
+            'password.min'          => 'Password minimal 8 karakter.',
+        ]);
 
-        return view('admin.users.show', compact(
-            'user', 'laporanUser',  'totalLaporan', 
-        ));
+        $user->nama_lengkap = $request->nama_lengkap;
+        $user->email        = $request->email;
+        $user->no_telepon   = $request->no_telepon;
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        return redirect()->route('admin.users.show', $user->id)
+            ->with('success', 'Profil user berhasil diperbarui!');
     }
 
     public function updateStatus($id)
@@ -70,5 +156,28 @@ class UserController extends Controller
         $user->status = 'diblokir';
         $user->save();
         return back()->with('success', 'User berhasil diblokir!');
+    }
+
+    public function export(Request $request)
+    {
+        $query = User::query();
+
+        if ($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('nama_lengkap', 'like', '%'.$request->search.'%')
+                  ->orWhere('email', 'like', '%'.$request->search.'%');
+            });
+        }
+
+        if ($request->role)     $query->where('role', $request->role);
+        if ($request->status)   $query->where('status', $request->status);
+        if ($request->provider) $query->where('provider', $request->provider);
+
+        $users = $query->orderBy('nama_lengkap')->get();
+
+        $pdf = Pdf::loadView('admin.users.pdf', compact('users'))
+                   ->setPaper('a4', 'landscape');
+
+        return $pdf->download('data-user-floodcare.pdf');
     }
 }

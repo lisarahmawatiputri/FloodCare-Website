@@ -17,9 +17,10 @@
         <a href="#" class="fc-btn fc-btn-ghost">
             <i class="mdi mdi-download-outline"></i> Export
         </a>
-        <!-- <a href="#" class="fc-btn fc-btn-primary">
+        <button type="button" class="fc-btn fc-btn-primary"
+            onclick="document.getElementById('modal-tambah-admin').style.display='flex'">
             <i class="mdi mdi-plus"></i> Tambah admin
-        </a> -->
+        </button>
     </div>
 </div>
 
@@ -27,6 +28,12 @@
 @if(session('success'))
 <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
     <i class="mdi mdi-check-circle me-2"></i> {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+    <i class="mdi mdi-alert-circle me-2"></i> {{ session('error') }}
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 @endif
@@ -178,14 +185,12 @@
             Menampilkan {{ $users->firstItem() }}–{{ $users->lastItem() }} dari {{ $users->total() }} user
         </span>
         <div class="user-pagination">
-            {{-- Prev --}}
             @if($users->onFirstPage())
                 <span class="user-page-btn user-page-disabled">‹</span>
             @else
                 <a href="{{ $users->previousPageUrl() }}" class="user-page-btn">‹</a>
             @endif
 
-            {{-- Pages --}}
             @foreach($users->getUrlRange(1, min($users->lastPage(), 5)) as $page => $url)
                 <a href="{{ $url }}" class="user-page-btn {{ $page == $users->currentPage() ? 'user-page-active' : '' }}">
                     {{ $page }}
@@ -199,7 +204,6 @@
                 </a>
             @endif
 
-            {{-- Next --}}
             @if($users->hasMorePages())
                 <a href="{{ $users->nextPageUrl() }}" class="user-page-btn">›</a>
             @else
@@ -209,4 +213,112 @@
     </div>
 </div>
 
+{{-- ===================== MODAL TAMBAH ADMIN ===================== --}}
+<div id="modal-tambah-admin" class="fc-modal-backdrop" style="display:none;"
+    onclick="if(event.target===this) this.style.display='none'">
+    <div class="fc-modal-box">
+        <div class="fc-modal-header">
+            <h5 class="fc-modal-title"><i class="mdi mdi-account-plus-outline me-2"></i>Tambah Admin</h5>
+            <button type="button" class="fc-modal-close"
+                onclick="document.getElementById('modal-tambah-admin').style.display='none'">
+                <i class="mdi mdi-close"></i>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('admin.users.store') }}">
+            @csrf
+
+            <div class="fc-modal-body">
+                <div class="fc-form-group">
+                    <label class="fc-label">Nama lengkap <span class="fc-required">*</span></label>
+                    <input type="text" name="nama_lengkap"
+                        class="fc-input @error('nama_lengkap') is-invalid @enderror"
+                        value="{{ old('nama_lengkap') }}"
+                        placeholder="Masukkan nama lengkap" required>
+                    @error('nama_lengkap')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="fc-form-group">
+                    <label class="fc-label">Email <span class="fc-required">*</span></label>
+                    <input type="email" name="email"
+                        class="fc-input @error('email') is-invalid @enderror"
+                        value="{{ old('email') }}"
+                        placeholder="admin@example.com" required>
+                    @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="fc-form-group">
+                    <label class="fc-label">No. telepon</label>
+                    <input type="text" name="no_telepon"
+                        class="fc-input @error('no_telepon') is-invalid @enderror"
+                        value="{{ old('no_telepon') }}"
+                        placeholder="08xxxxxxxxxx">
+                    @error('no_telepon')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="fc-form-group">
+                    <label class="fc-label">Password <span class="fc-required">*</span></label>
+                    <div class="fc-input-password-wrap">
+                        <input type="password" name="password" id="tambah-password"
+                            class="fc-input @error('password') is-invalid @enderror"
+                            placeholder="Min. 8 karakter" required>
+                        <button type="button" class="fc-input-password-toggle"
+                            onclick="togglePassword('tambah-password', this)">
+                            <i class="mdi mdi-eye-outline"></i>
+                        </button>
+                    </div>
+                    @error('password')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="fc-form-group">
+                    <label class="fc-label">Konfirmasi password <span class="fc-required">*</span></label>
+                    <div class="fc-input-password-wrap">
+                        <input type="password" name="password_confirmation" id="tambah-password-confirm"
+                            class="fc-input"
+                            placeholder="Ulangi password" required>
+                        <button type="button" class="fc-input-password-toggle"
+                            onclick="togglePassword('tambah-password-confirm', this)">
+                            <i class="mdi mdi-eye-outline"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fc-modal-footer">
+                <button type="button" class="fc-btn fc-btn-ghost"
+                    onclick="document.getElementById('modal-tambah-admin').style.display='none'">
+                    Batal
+                </button>
+                <button type="submit" class="fc-btn fc-btn-primary">
+                    <i class="mdi mdi-account-plus-outline"></i> Buat akun admin
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{{-- ===================== END MODAL TAMBAH ADMIN ===================== --}}
+
+{{-- Buka modal otomatis jika ada error validasi --}}
+@if($errors->any())
+<script>
+    document.getElementById('modal-tambah-admin').style.display = 'flex';
+</script>
+@endif
+
 @endsection
+
+@push('scripts')
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon  = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('mdi-eye-outline', 'mdi-eye-off-outline');
+    } else {
+        input.type = 'password';
+        icon.classList.replace('mdi-eye-off-outline', 'mdi-eye-outline');
+    }
+}
+</script>
+@endpush

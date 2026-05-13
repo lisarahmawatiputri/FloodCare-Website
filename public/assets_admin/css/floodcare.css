@@ -3490,3 +3490,305 @@ body {
     gap: 10px;
     margin-top: 20px;
 }
+
+.fc-status-opt input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.fc-status-opt {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    user-select: none;
+}
+
+.fc-status-opt.active {
+    border-color: #f97316;
+    background-color: #fff7ed;
+    color: #f97316;
+}
+
+/* ── Alamat lokasi link ── */
+.flp-alamat-link {
+    font-size: 12px;
+    color: var(--primary);
+    text-decoration: none;
+    transition: opacity .15s;
+}
+.flp-alamat-link:hover {
+    opacity: .75;
+}
+.flp-alamat-text {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ── Pelapor cell ── */
+.flp-pelapor-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ── Filter card margin ── */
+.flp-filter-card-wrap {
+    margin-bottom: 12px;
+}
+
+/* ── Foto thumb image ── */
+.flp-foto-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* ── Foto box image (detail) ── */
+.flp-foto-box-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* ── Info cell margin top ── */
+.flp-info-cell-mt {
+    margin-top: 8px;
+}
+
+/* ── Status pill margin bottom ── */
+.flp-status-pill-mb {
+    margin-bottom: 16px;
+}
+
+/* ── Textarea catatan admin ── */
+.flp-textarea-catatan {
+    min-height: 100px;
+}
+
+/* ── Breadcrumb detail ── */
+.flp-breadcrumb-wrap {
+    margin-bottom: 4px;
+}
+.flp-breadcrumb-text {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+.flp-breadcrumb-current {
+    color: var(--primary);
+}
+
+/* ── Konfirmasi warga item ── */
+.flp-konfirmasi-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+.flp-konfirmasi-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.flp-konfirmasi-nama {
+    font-size: 13px;
+    font-weight: 600;
+}
+.flp-konfirmasi-akurat {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-left: 6px;
+}
+.flp-konfirmasi-komentar {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+.flp-konfirmasi-time {
+    font-size: 11px;
+    color: #bbb;
+    margin-top: 2px;
+}
+
+/* ── Konfirmasi warga title count ── */
+.flp-konfirmasi-count {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+/* =========================================================
+   Tambahan CSS untuk modal & aksi card user
+   Tambahkan ke assets_admin/css/user.css
+   ========================================================= */
+
+/* --- Aksi Card layout --- */
+.user-aksi-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    padding: 1.25rem;
+    margin-top: 1rem;
+}
+.user-aksi-title {
+    font-size: .85rem;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 1rem;
+}
+.user-aksi-actions {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+}
+.fc-btn-full {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+}
+
+/* --- Modal backdrop --- */
+.fc-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+/* --- Modal box --- */
+.fc-modal-box {
+    background: #fff;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    overflow: hidden;
+    animation: modalIn .18s ease;
+}
+@keyframes modalIn {
+    from { opacity:0; transform:translateY(-12px) scale(.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+/* --- Modal header --- */
+.fc-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+.fc-modal-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+.fc-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #888;
+    cursor: pointer;
+    padding: .2rem .4rem;
+    border-radius: 6px;
+    transition: background .15s;
+}
+.fc-modal-close:hover { background: #f5f5f5; color: #333; }
+
+/* --- Modal body --- */
+.fc-modal-body {
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: .9rem;
+}
+
+/* --- Modal footer --- */
+.fc-modal-footer {
+    display: flex;
+    gap: .7rem;
+    justify-content: flex-end;
+    padding: 1rem 1.4rem;
+    border-top: 1px solid #f0f0f0;
+    background: #fafafa;
+}
+
+/* --- Form elements inside modal --- */
+.fc-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+}
+.fc-label {
+    font-size: .85rem;
+    font-weight: 500;
+    color: #444;
+}
+.fc-required {
+    color: #e84335;
+}
+.fc-input {
+    width: 100%;
+    padding: .55rem .8rem;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: .9rem;
+    color: #333;
+    transition: border-color .15s, box-shadow .15s;
+    outline: none;
+}
+.fc-input:focus {
+    border-color: #ff6600;
+    box-shadow: 0 0 0 3px rgba(255,102,0,.1);
+}
+.fc-input.is-invalid {
+    border-color: #dc3545;
+}
+
+/* --- Password input dengan toggle --- */
+.fc-input-password-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.fc-input-password-wrap .fc-input {
+    padding-right: 2.6rem;
+}
+.fc-input-password-toggle {
+    position: absolute;
+    right: .7rem;
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    line-height: 1;
+    transition: color .15s;
+}
+.fc-input-password-toggle:hover { color: #555; }

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Laporan;
+use App\Models\KonfirmasiLaporan;
 
 class User extends Authenticatable
 {
@@ -41,8 +43,8 @@ class User extends Authenticatable
         return $this->hasMany(Laporan::class, 'user_id');
     }
 
-    // public function konfirmasi()
-    // {
-    //     return $this->hasMany(KonfirmasiLaporan::class, 'user_id');
-    // }
+    public function konfirmasi()
+    {
+        return $this->hasMany(KonfirmasiLaporan::class, 'user_id');
+    }
 }

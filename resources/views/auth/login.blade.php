@@ -246,7 +246,7 @@
         </div>
 
         <!-- REGISTER FORM -->
-        <div class="form-box register">
+        <!-- <div class="form-box register">
             <h2>Buat Akun Baru </h2>
             <p class="subtitle">Daftar dan mulai gunakan FloodCare</p>
 
@@ -288,10 +288,10 @@
                 <button type="submit" class="btn-main">Daftar</button>
             </form>
         </div>
-    </div>
+    </div> -->
 
     <!-- PANEL SIDE -->
-    <div class="panel-side">
+    <!-- <div class="panel-side">
         <div class="panel-content" id="panelContent">
             <div class="panel-logo">
                <img src="{{ asset('assets/img/FloodCare.svg') }}" alt="FloodCare" onerror="this.style.display='none'">
@@ -301,7 +301,7 @@
             <div class="panel-desc" id="panelDesc">Bergabunglah bersama FloodCare dan bantu masyarakat lebih siap menghadapi banjir.</div>
             <button class="btn-switch" id="switchBtn" onclick="toggleForm()">Daftar Sekarang →</button>
         </div>
-    </div>
+    </div> -->
 
 </div>
 
@@ -339,7 +339,7 @@
         }, 250);
     }
 
-    function updatePanelText(showingLogin) {
+    // function updatePanelText(showingLogin) {
         if (showingLogin) {
             title.textContent = 'Belum punya akun?';
             desc.textContent  = 'Bergabunglah bersama FloodCare dan bantu masyarakat lebih siap menghadapi banjir.';

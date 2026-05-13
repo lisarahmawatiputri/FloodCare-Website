@@ -7,77 +7,70 @@
 <div class="fc-page-header">
     <div>
         <h1 class="fc-page-title">Laporan Banjir</h1>
-        <!-- <p class="fc-page-subtitle">Kelola & validasi laporan masuk dari masyarakat</p> -->
-    </div>
-    <div style="display:flex; gap:8px;">
-        <button class="fc-btn fc-btn-secondary" onclick="exportLaporan()">
-            <i class="mdi mdi-download-outline"></i> Export
-        </button>
-        <a href="#" class="fc-btn fc-btn-primary">
-            <i class="mdi mdi-plus"></i> Tambah
-        </a>
     </div>
 </div>
+
+@if(session('success'))
+<div class="fc-alert fc-alert-success">
+    <i class="mdi mdi-check-circle-outline"></i> {{ session('success') }}
+</div>
+@endif
 
 {{-- Stat cards --}}
 <div class="flp-stat-row">
     <div class="flp-stat-card">
         <span class="flp-stat-dot flp-dot-gray"></span>
         <div>
-            <div class="flp-stat-num">7</div>
+            <div class="flp-stat-num">{{ $countMenunggu }}</div>
             <div class="flp-stat-label">Menunggu</div>
         </div>
     </div>
     <div class="flp-stat-card">
         <span class="flp-stat-dot flp-dot-green"></span>
         <div>
-            <div class="flp-stat-num">10</div>
+            <div class="flp-stat-num">{{ $countValid }}</div>
             <div class="flp-stat-label">Valid</div>
         </div>
     </div>
     <div class="flp-stat-card">
         <span class="flp-stat-dot flp-dot-red"></span>
         <div>
-            <div class="flp-stat-num">4</div>
+            <div class="flp-stat-num">{{ $countTidakValid }}</div>
             <div class="flp-stat-label">Tidak valid</div>
-        </div>
-    </div>
-    <div class="flp-stat-card">
-        <span class="flp-stat-dot flp-dot-blue"></span>
-        <div>
-            <div class="flp-stat-num">3</div>
-            <div class="flp-stat-label">Diterima</div>
         </div>
     </div>
 </div>
 
-{{-- Filter bar --}}
-<div class="fc-card fc-filter-card" style="margin-bottom:12px;">
+{{-- Filter --}}
+<form method="GET" action="{{ route('admin.laporan.index') }}">
+<div class="fc-card fc-filter-card flp-filter-card-wrap">
     <div class="fc-filter-bar">
         <div class="fc-search-wrap">
             <i class="mdi mdi-magnify fc-search-icon"></i>
-            <input type="text" class="fc-input fc-search-input" placeholder="Cari laporan...">
+            <input type="text" name="search" class="fc-input fc-search-input"
+                placeholder="Cari laporan..."
+                value="{{ request('search') }}">
         </div>
         <div class="fc-status-select-wrap">
-            <select class="fc-input fc-select fc-status-select">
+            <select name="status" class="fc-input fc-select fc-status-select" onchange="this.form.submit()">
                 <option value="">Semua status</option>
-                <option value="menunggu">Menunggu</option>
-                <option value="valid">Valid</option>
-                <option value="tidak_valid">Tidak valid</option>
-                <option value="diterima">Diterima</option>
+                <option value="menunggu"    {{ request('status') == 'menunggu'    ? 'selected' : '' }}>Menunggu</option>
+                <option value="valid"       {{ request('status') == 'valid'       ? 'selected' : '' }}>Valid</option>
+                <option value="tidak_valid" {{ request('status') == 'tidak_valid' ? 'selected' : '' }}>Tidak valid</option>
             </select>
         </div>
         <div class="fc-status-select-wrap">
-            <select class="fc-input fc-select fc-status-select">
+            <select name="risiko" class="fc-input fc-select fc-status-select" onchange="this.form.submit()">
                 <option value="">Semua risiko</option>
-                <option value="tinggi">Tinggi</option>
-                <option value="sedang">Sedang</option>
-                <option value="rendah">Rendah</option>
+                <option value="tinggi"  {{ request('risiko') == 'tinggi'  ? 'selected' : '' }}>Tinggi</option>
+                <option value="sedang"  {{ request('risiko') == 'sedang'  ? 'selected' : '' }}>Sedang</option>
+                <option value="rendah"  {{ request('risiko') == 'rendah'  ? 'selected' : '' }}>Rendah</option>
             </select>
         </div>
-        <span class="fc-filter-count">24 laporan</span>
+        <span class="fc-filter-count">{{ $totalLaporan }} laporan</span>
     </div>
 </div>
+</form>
 
 {{-- Table --}}
 <div class="fc-card fc-card-table">
@@ -85,170 +78,139 @@
         <table class="fc-table">
             <thead>
                 <tr>
-                    <th style="width:40px;">#</th>
+                    <th class="flp-col-no">No</th>
                     <th>Pelapor & judul</th>
                     <th>Alamat</th>
                     <th>Tinggi air</th>
                     <th>Risiko</th>
-                    <th style="width:60px;">Foto</th>
+                    <th class="flp-col-foto">Foto</th>
                     <th>Status</th>
-                    <th style="width:100px; text-align:center;">Aksi</th>
+                    <th class="flp-col-aksi">Aksi</th>
                 </tr>
             </thead>
             <tbody>
-
+                @forelse($laporans as $i => $laporan)
+                @php
+                    $colors  = ['#ff6a3d','#3d9fff','#ff6600','#9b59b6','#2abe8a','#e8a82a'];
+                    $inisial = strtoupper(substr(optional($laporan->pelapor)->nama_lengkap ?? 'U', 0, 2));
+                    $color   = $colors[crc32(optional($laporan->pelapor)->email ?? '') % count($colors)];
+                @endphp
                 <tr>
-                    <td class="flp-num">1</td>
+                    <td class="flp-num">{{ $laporans->firstItem() + $i }}</td>
                     <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <div class="flp-avatar" style="background:#ff6a3d;">AR</div>
+                        <div class="flp-pelapor-wrap">
+                            <div class="flp-avatar" style="background:{{ $color }};">{{ $inisial }}</div>
                             <div>
-                                <div class="fc-table-title">Banjir Jl. Mastrip</div>
-                                <div class="fc-table-meta">Ahmad Rizki</div>
+                                <div class="fc-table-title">{{ $laporan->judul }}</div>
+                                <div class="fc-table-meta">{{ optional($laporan->pelapor)->nama_lengkap ?? '—' }}</div>
                             </div>
                         </div>
                     </td>
-                    <td><span class="fc-table-meta">Jl. Mastrip, Jember</span></td>
-                    <td><span class="flp-water flp-water-tinggi">60 cm</span></td>
-                    <td><span class="fc-badge-status flp-badge-tinggi">Tinggi</span></td>
-                    <td><div class="flp-foto-thumb"><i class="mdi mdi-image-outline"></i></div></td>
-                    <td><span class="fc-badge-status flp-badge-menunggu">Menunggu</span></td>
+                    <td>
+                        @if($laporan->latitude && $laporan->longitude)
+                            <a href="https://www.google.com/maps?q={{ $laporan->latitude }},{{ $laporan->longitude }}"
+                               target="_blank" class="flp-alamat-link">
+                                {{ $laporan->alamat_lokasi ?? 'Lihat lokasi' }}
+                            </a>
+                        @else
+                            <span class="flp-alamat-text">{{ $laporan->alamat_lokasi ?? '—' }}</span>
+                        @endif
+                    </td>
+                    <td>
+                        <span class="flp-water flp-water-{{ $laporan->tingkat_risiko ?? 'rendah' }}">
+                            {{ $laporan->tinggi_banjir_cm ?? '—' }} cm
+                        </span>
+                    </td>
+                    <td>
+                        <span class="fc-badge-status flp-badge-{{ $laporan->tingkat_risiko ?? 'rendah' }}">
+                            {{ ucfirst($laporan->tingkat_risiko ?? '—') }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="flp-foto-thumb">
+                            @if($laporan->foto_laporan)
+                                <img src="{{ asset('storage/'.$laporan->foto_laporan) }}"
+                                     class="flp-foto-thumb-img">
+                            @else
+                                <i class="mdi mdi-image-outline"></i>
+                            @endif
+                        </div>
+                    </td>
+                    <td>
+                        @php
+                            $statusClass = [
+                                'menunggu'    => 'flp-badge-menunggu',
+                                'valid'       => 'flp-badge-valid',
+                                'tidak_valid' => 'flp-badge-tidak-valid',
+                                'diterima'    => 'flp-badge-diterima',
+                            ][$laporan->status_laporan ?? 'menunggu'] ?? 'flp-badge-menunggu';
+                            $statusLabel = [
+                                'menunggu'    => 'Menunggu',
+                                'valid'       => 'Valid',
+                                'tidak_valid' => 'Tidak valid',
+                                'diterima'    => 'Diterima',
+                            ][$laporan->status_laporan ?? 'menunggu'] ?? 'Menunggu';
+                        @endphp
+                        <span class="fc-badge-status {{ $statusClass }}">{{ $statusLabel }}</span>
+                    </td>
                     <td>
                         <div class="fc-action-group">
-                            <a href="#" class="fc-action-btn" title="Detail">
+                            <a href="{{ route('admin.laporan.show', $laporan->id) }}"
+                               class="fc-action-btn" title="Detail">
                                 <i class="mdi mdi-eye-outline"></i>
                             </a>
-                            <a href="#" class="fc-action-btn" title="Edit">
-                                <i class="mdi mdi-pencil-outline"></i>
-                            </a>
-                            <button class="fc-action-btn fc-action-btn-danger" title="Hapus" onclick="confirmDelete(1)">
-                                <i class="mdi mdi-trash-can-outline"></i>
-                            </button>
+                            <form action="{{ route('admin.laporan.destroy', $laporan->id) }}"
+                                  method="POST" class="flp-form-inline"
+                                  onsubmit="return confirm('Hapus laporan ini?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="fc-action-btn fc-action-btn-danger" title="Hapus">
+                                    <i class="mdi mdi-trash-can-outline"></i>
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>
-
+                @empty
                 <tr>
-                    <td class="flp-num">2</td>
-                    <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <div class="flp-avatar" style="background:#3d9fff;">SW</div>
-                            <div>
-                                <div class="fc-table-title">Genangan Griya Indah</div>
-                                <div class="fc-table-meta">Siti Wahyuni</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span class="fc-table-meta">Griya Indah, Bondowoso</span></td>
-                    <td><span class="flp-water flp-water-sedang">30 cm</span></td>
-                    <td><span class="fc-badge-status flp-badge-sedang">Sedang</span></td>
-                    <td><div class="flp-foto-thumb"><i class="mdi mdi-image-outline"></i></div></td>
-                    <td><span class="fc-badge-status flp-badge-valid">Valid</span></td>
-                    <td>
-                        <div class="fc-action-group">
-                            <a href="#" class="fc-action-btn" title="Detail">
-                                <i class="mdi mdi-eye-outline"></i>
-                            </a>
-                            <a href="#" class="fc-action-btn" title="Edit">
-                                <i class="mdi mdi-pencil-outline"></i>
-                            </a>
-                            <button class="fc-action-btn fc-action-btn-danger" title="Hapus" onclick="confirmDelete(2)">
-                                <i class="mdi mdi-trash-can-outline"></i>
-                            </button>
-                        </div>
+                    <td colspan="8" class="fc-table-empty">
+                        <i class="mdi mdi-water-off-outline"></i>
+                        Belum ada laporan masuk
                     </td>
                 </tr>
-
-                <tr>
-                    <td class="flp-num">3</td>
-                    <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <div class="flp-avatar" style="background:#ff6600;">BP</div>
-                            <div>
-                                <div class="fc-table-title">Banjir Ds. Sukorambi</div>
-                                <div class="fc-table-meta">Budi Prasetyo</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span class="fc-table-meta">Ds. Sukorambi, Jember</span></td>
-                    <td><span class="flp-water flp-water-rendah">15 cm</span></td>
-                    <td><span class="fc-badge-status flp-badge-rendah">Rendah</span></td>
-                    <td><div class="flp-foto-thumb"><i class="mdi mdi-image-outline"></i></div></td>
-                    <td><span class="fc-badge-status flp-badge-diterima">Diterima</span></td>
-                    <td>
-                        <div class="fc-action-group">
-                            <a href="#" class="fc-action-btn" title="Detail">
-                                <i class="mdi mdi-eye-outline"></i>
-                            </a>
-                            <a href="#" class="fc-action-btn" title="Edit">
-                                <i class="mdi mdi-pencil-outline"></i>
-                            </a>
-                            <button class="fc-action-btn fc-action-btn-danger" title="Hapus" onclick="confirmDelete(3)">
-                                <i class="mdi mdi-trash-can-outline"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td class="flp-num">4</td>
-                    <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <div class="flp-avatar" style="background:#9b59b6;">DN</div>
-                            <div>
-                                <div class="fc-table-title">Genangan Kaliurang</div>
-                                <div class="fc-table-meta">Dwi Novita</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><span class="fc-table-meta">Jl. Kaliurang, Jember</span></td>
-                    <td><span class="flp-water flp-water-sedang">25 cm</span></td>
-                    <td><span class="fc-badge-status flp-badge-sedang">Sedang</span></td>
-                    <td><div class="flp-foto-thumb"><i class="mdi mdi-image-outline"></i></div></td>
-                    <td><span class="fc-badge-status flp-badge-tidak-valid">Tidak valid</span></td>
-                    <td>
-                        <div class="fc-action-group">
-                            <a href="#" class="fc-action-btn" title="Detail">
-                                <i class="mdi mdi-eye-outline"></i>
-                            </a>
-                            <a href="#" class="fc-action-btn" title="Edit">
-                                <i class="mdi mdi-pencil-outline"></i>
-                            </a>
-                            <button class="fc-action-btn fc-action-btn-danger" title="Hapus" onclick="confirmDelete(4)">
-                                <i class="mdi mdi-trash-can-outline"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-
+                @endforelse
             </tbody>
         </table>
     </div>
 
     {{-- Pagination --}}
     <div class="flp-pagination">
-        <span class="flp-page-info">Menampilkan 1–4 dari 24 laporan</span>
+        <span class="flp-page-info">
+            Menampilkan {{ $laporans->firstItem() }}–{{ $laporans->lastItem() }}
+            dari {{ $laporans->total() }} laporan
+        </span>
         <div class="flp-page-btns">
-            <button class="flp-page-btn" disabled><i class="mdi mdi-chevron-left"></i></button>
-            <button class="flp-page-btn flp-page-active">1</button>
-            <button class="flp-page-btn">2</button>
-            <button class="flp-page-btn">3</button>
-            <button class="flp-page-btn"><i class="mdi mdi-chevron-right"></i></button>
-        </div>
-    </div>
-</div>
+            @if($laporans->onFirstPage())
+                <button class="flp-page-btn" disabled><i class="mdi mdi-chevron-left"></i></button>
+            @else
+                <a href="{{ $laporans->previousPageUrl() }}" class="flp-page-btn">
+                    <i class="mdi mdi-chevron-left"></i>
+                </a>
+            @endif
 
-{{-- Modal konfirmasi hapus --}}
-<div class="flp-modal-overlay" id="deleteModal">
-    <div class="flp-modal">
-        <div class="flp-modal-icon">
-            <i class="mdi mdi-trash-can-outline"></i>
-        </div>
-        <h3 class="flp-modal-title">Hapus laporan?</h3>
-        <p class="flp-modal-desc">Laporan yang dihapus tidak dapat dikembalikan.</p>
-        <div class="flp-modal-actions">
-            <button class="fc-btn fc-btn-secondary" onclick="closeModal()">Batal</button>
-            <button class="fc-btn fc-btn-danger" onclick="doDelete()">Hapus</button>
+            @foreach($laporans->getUrlRange(1, $laporans->lastPage()) as $page => $url)
+                <a href="{{ $url }}"
+                   class="flp-page-btn {{ $page == $laporans->currentPage() ? 'flp-page-active' : '' }}">
+                    {{ $page }}
+                </a>
+            @endforeach
+
+            @if($laporans->hasMorePages())
+                <a href="{{ $laporans->nextPageUrl() }}" class="flp-page-btn">
+                    <i class="mdi mdi-chevron-right"></i>
+                </a>
+            @else
+                <button class="flp-page-btn" disabled><i class="mdi mdi-chevron-right"></i></button>
+            @endif
         </div>
     </div>
 </div>
