@@ -84,35 +84,24 @@ $color    = $colors[crc32($user->email) % count($colors)];
         {{-- Aksi Card --}}
         <div class="user-aksi-card">
             <div class="user-aksi-title">Aksi akun</div>
-            <div class="user-aksi-grid">
-                <a href="#" class="fc-btn fc-btn-ghost">
+            <div class="user-aksi-actions">
+
+                {{-- Edit Profil --}}
+                <a href="{{ route('admin.users.edit', $user->id) }}" class="fc-btn fc-btn-ghost fc-btn-full">
                     <i class="mdi mdi-pencil-outline"></i> Edit profil
                 </a>
-                <button type="button" class="fc-btn fc-btn-ghost"
-                    onclick="document.getElementById('modal-role').style.display='flex'">
-                    <i class="mdi mdi-account-convert-outline"></i> Ubah role
-                </button>
 
-                {{-- Nonaktifkan / Aktifkan --}}
-                <form method="POST" action="{{ route('admin.users.status', $user->id) }}" class="fc-btn-full">
-                    @csrf @method('PATCH')
-                    <button type="submit" class="fc-btn fc-btn-warning">
-                        <i class="mdi mdi-pause-circle-outline"></i>
-                        {{ $user->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}
-                    </button>
-                </form>
-
-                {{-- Blokir --}}
+                {{-- Blokir / Sudah diblokir --}}
                 @if($user->status !== 'diblokir')
                 <form method="POST" action="{{ route('admin.users.blokir', $user->id) }}" class="fc-btn-full"
                     onsubmit="return confirm('Yakin ingin memblokir user ini?')">
                     @csrf @method('PATCH')
-                    <button type="submit" class="fc-btn fc-btn-danger">
-                        <i class="mdi mdi-cancel"></i> Blokir user ini
+                    <button type="submit" class="fc-btn fc-btn-danger fc-btn-full">
+                        <i class="mdi mdi-cancel"></i> Blokir akun
                     </button>
                 </form>
                 @else
-                <div class="fc-btn fc-btn-danger" style="opacity:0.5; cursor:not-allowed;">
+                <div class="fc-btn fc-btn-danger fc-btn-full" style="opacity:0.5; cursor:not-allowed; justify-content:center;">
                     <i class="mdi mdi-cancel"></i> User diblokir
                 </div>
                 @endif
@@ -125,7 +114,9 @@ $color    = $colors[crc32($user->email) % count($colors)];
     {{-- KOLOM KANAN --}}
     <div>
 
-        {{-- Stat mini --}}
+        {{-- ========== SUPERADMIN: stat keduanya + tab laporan & konfirmasi ========== --}}
+        @if($user->role === 'superadmin')
+
         <div class="user-stat-mini-grid">
             <div class="user-stat-mini">
                 <div class="user-stat-mini-icon red">
@@ -141,13 +132,12 @@ $color    = $colors[crc32($user->email) % count($colors)];
                     <i class="mdi mdi-check-circle-outline"></i>
                 </div>
                 <div>
-                    <div class="user-stat-mini-num">{{ $totalKonfirmasi ?? 0 }}</div>
+                    <div class="user-stat-mini-num">{{ $totalKonfirmasi }}</div>
                     <div class="user-stat-mini-label">Konfirmasi laporan</div>
                 </div>
             </div>
         </div>
 
-        {{-- Tab --}}
         <div class="user-tab-card">
             <div class="user-tab-header">
                 <button class="user-tab-btn active" data-tab="laporan">Laporan banjir</button>
@@ -155,7 +145,6 @@ $color    = $colors[crc32($user->email) % count($colors)];
             </div>
             <div class="user-tab-content">
 
-                {{-- Tab Laporan --}}
                 <div class="user-tab-pane active" id="tab-laporan">
                     <table class="user-inner-table">
                         <thead>
@@ -168,9 +157,7 @@ $color    = $colors[crc32($user->email) % count($colors)];
                         </thead>
                         <tbody>
                             @forelse($laporanUser as $i => $lap)
-                            @php
-                                $risiko = $lap->tingkat_risiko ?? 'rendah';
-                            @endphp
+                            @php $risiko = $lap->tingkat_risiko ?? 'rendah'; @endphp
                             <tr>
                                 <td class="user-no">{{ $i + 1 }}</td>
                                 <td class="user-nama">{{ $lap->judul }}</td>
@@ -190,7 +177,6 @@ $color    = $colors[crc32($user->email) % count($colors)];
                     </table>
                 </div>
 
-                {{-- Tab Konfirmasi --}}
                 <div class="user-tab-pane" id="tab-konfirmasi">
                     <table class="user-inner-table">
                         <thead>
@@ -201,7 +187,7 @@ $color    = $colors[crc32($user->email) % count($colors)];
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($konfirmasiUser ?? [] as $i => $k)
+                            @forelse($konfirmasiUser as $i => $k)
                             <tr>
                                 <td class="user-no">{{ $i + 1 }}</td>
                                 <td class="user-nama">{{ $k->laporan->judul ?? '—' }}</td>
@@ -219,42 +205,159 @@ $color    = $colors[crc32($user->email) % count($colors)];
             </div>
         </div>
 
+        @elseif($user->role === 'masyarakat')
+
+        <div class="user-stat-mini-grid">
+            <div class="user-stat-mini">
+                <div class="user-stat-mini-icon red">
+                    <i class="mdi mdi-alert-circle-outline"></i>
+                </div>
+                <div>
+                    <div class="user-stat-mini-num">{{ $totalLaporan }}</div>
+                    <div class="user-stat-mini-label">Total laporan</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="user-tab-card">
+            <div class="user-tab-header">
+                <button class="user-tab-btn active" data-tab="laporan">Laporan banjir</button>
+            </div>
+            <div class="user-tab-content">
+
+                <div class="user-tab-pane active" id="tab-laporan">
+                    <table class="user-inner-table">
+                        <thead>
+                            <tr>
+                                <th width="6%">No</th>
+                                <th>Judul laporan</th>
+                                <th width="14%">Tinggi air</th>
+                                <th width="14%">Risiko</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($laporanUser as $i => $lap)
+                            @php $risiko = $lap->tingkat_risiko ?? 'rendah'; @endphp
+                            <tr>
+                                <td class="user-no">{{ $i + 1 }}</td>
+                                <td class="user-nama">{{ $lap->judul }}</td>
+                                <td>
+                                    <span class="user-tinggi-{{ $risiko }}">{{ $lap->tinggi_air ?? '—' }} cm</span>
+                                </td>
+                                <td>
+                                    <span class="status-badge {{ $risiko }}">{{ ucfirst($risiko) }}</span>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="fc-table-empty">Belum ada laporan</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        {{-- ========== ADMIN: stat konfirmasi + tab konfirmasi ========== --}}
+       @else
+
+<div class="user-stat-mini-grid">
+    <div class="user-stat-mini">
+        <div class="user-stat-mini-icon red">
+            <i class="mdi mdi-check-decagram-outline"></i>
+        </div>
+        <div>
+            <div class="user-stat-mini-num">{{ $totalLaporan }}</div>
+            <div class="user-stat-mini-label">Laporan divalidasi</div>
+        </div>
+    </div>
+    <div class="user-stat-mini">
+        <div class="user-stat-mini-icon green">
+            <i class="mdi mdi-check-circle-outline"></i>
+        </div>
+        <div>
+            <div class="user-stat-mini-num">{{ $totalKonfirmasi }}</div>
+            <div class="user-stat-mini-label">Konfirmasi laporan</div>
+        </div>
     </div>
 </div>
 
-{{-- Modal Ubah Role --}}
-<div id="modal-role" class="fc-modal-backdrop" style="display:none;">
-    <div class="fc-modal-box">
-        <button type="button" class="fc-btn fc-btn-ghost"
-            onclick="document.getElementById('modal-role').classList.add('open')">
-            <i class="mdi mdi-account-convert-outline"></i> Ubah role
-        </button>
-        <p class="fc-modal-sub">Mengubah role untuk <strong>{{ $user->nama_lengkap }}</strong></p>
-        <form method="POST" action="{{ route('admin.users.role', $user->id) }}">
-            @csrf @method('PATCH')
-            <div class="fc-form-group">
-                <label class="fc-label">Role baru</label>
-                <select name="role" class="fc-select">
-                    <option value="masyarakat" {{ $user->role === 'masyarakat' ? 'selected' : '' }}>Masyarakat</option>
-                    <option value="admin"      {{ $user->role === 'admin'      ? 'selected' : '' }}>Admin</option>
-                    <option value="superadmin" {{ $user->role === 'superadmin' ? 'selected' : '' }}>Superadmin</option>
-                </select>
-            </div>
-            <div class="fc-modal-actions">
-                <button type="button" class="fc-btn fc-btn-ghost fc-btn-full"
-                    onclick="document.getElementById('modal-role').style.display='none'">
-                    Batal
-                </button>
-                <button type="submit" class="fc-btn fc-btn-primary fc-btn-full">
-                    Simpan
-                </button>
-            </div>
-        </form>
+<div class="user-tab-card">
+    <div class="user-tab-header">
+        <button class="user-tab-btn active" data-tab="validasi">Laporan divalidasi</button>
+        <button class="user-tab-btn" data-tab="konfirmasi">Konfirmasi</button>
+    </div>
+    <div class="user-tab-content">
+
+        {{-- Tab laporan divalidasi --}}
+        <div class="user-tab-pane active" id="tab-validasi">
+            <table class="user-inner-table">
+                <thead>
+                    <tr>
+                        <th width="6%">No</th>
+                        <th>Judul laporan</th>
+                        <th width="14%">Status</th>
+                        <th width="18%">Tanggal validasi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($laporanUser as $i => $lap)
+                    <tr>
+                        <td class="user-no">{{ $i + 1 }}</td>
+                        <td class="user-nama">{{ $lap->judul }}</td>
+                        <td>
+                            <span class="fc-badge-status flp-badge-{{ $lap->status_laporan ?? 'menunggu' }}">
+                                {{ ['menunggu'=>'Menunggu','valid'=>'Valid','tidak_valid'=>'Tidak Valid'][$lap->status_laporan] ?? '—' }}
+                            </span>
+                        </td>
+                        <td class="user-email">
+                            {{ $lap->updated_at ? $lap->updated_at->format('d M Y, H:i') : '—' }}
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="fc-table-empty">Belum ada laporan divalidasi</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Tab konfirmasi --}}
+        <div class="user-tab-pane" id="tab-konfirmasi">
+            <table class="user-inner-table">
+                <thead>
+                    <tr>
+                        <th width="6%">No</th>
+                        <th>Laporan dikonfirmasi</th>
+                        <th width="20%">Tanggal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($konfirmasiUser as $i => $k)
+                    <tr>
+                        <td class="user-no">{{ $i + 1 }}</td>
+                        <td class="user-nama">{{ $k->laporan->judul ?? '—' }}</td>
+                        <td class="user-email">{{ $k->created_at->format('d M Y') }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="3" class="fc-table-empty">Belum ada konfirmasi</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
     </div>
 </div>
+
+@endif
+
+    </div>
+</div>
+
 
 @endsection
-
-@push('scripts')
-<script src="{{ asset('assets_admin/js/user.js') }}"></script>
-@endpush

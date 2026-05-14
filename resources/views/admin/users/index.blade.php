@@ -14,12 +14,14 @@
         <h1>Kelola User</h1>
     </div>
     <div style="display:flex; gap:10px;">
-        <a href="#" class="fc-btn fc-btn-ghost">
+        <a href="{{ route('admin.users.export', request()->query()) }}" class="fc-btn fc-btn-ghost">
             <i class="mdi mdi-download-outline"></i> Export
         </a>
-        <!-- <a href="#" class="fc-btn fc-btn-primary">
+        @if(auth()->user()->role === 'superadmin')
+        <a href="{{ route('admin.users.create') }}" class="fc-btn fc-btn-primary">
             <i class="mdi mdi-plus"></i> Tambah admin
-        </a> -->
+        </a>
+        @endif
     </div>
 </div>
 
@@ -27,6 +29,12 @@
 @if(session('success'))
 <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
     <i class="mdi mdi-check-circle me-2"></i> {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+    <i class="mdi mdi-alert-circle me-2"></i> {{ session('error') }}
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 @endif
@@ -74,8 +82,10 @@
     </div>
     <select name="role" class="user-filter-select" onchange="this.form.submit()">
         <option value="">Semua role</option>
+        @if(auth()->user()->role === 'superadmin')
         <option value="superadmin" {{ request('role') == 'superadmin' ? 'selected' : '' }}>Superadmin</option>
         <option value="admin"      {{ request('role') == 'admin'      ? 'selected' : '' }}>Admin</option>
+        @endif
         <option value="masyarakat" {{ request('role') == 'masyarakat' ? 'selected' : '' }}>Masyarakat</option>
     </select>
     <select name="status" class="user-filter-select" onchange="this.form.submit()">
@@ -178,14 +188,12 @@
             Menampilkan {{ $users->firstItem() }}–{{ $users->lastItem() }} dari {{ $users->total() }} user
         </span>
         <div class="user-pagination">
-            {{-- Prev --}}
             @if($users->onFirstPage())
                 <span class="user-page-btn user-page-disabled">‹</span>
             @else
                 <a href="{{ $users->previousPageUrl() }}" class="user-page-btn">‹</a>
             @endif
 
-            {{-- Pages --}}
             @foreach($users->getUrlRange(1, min($users->lastPage(), 5)) as $page => $url)
                 <a href="{{ $url }}" class="user-page-btn {{ $page == $users->currentPage() ? 'user-page-active' : '' }}">
                     {{ $page }}
@@ -199,7 +207,6 @@
                 </a>
             @endif
 
-            {{-- Next --}}
             @if($users->hasMorePages())
                 <a href="{{ $users->nextPageUrl() }}" class="user-page-btn">›</a>
             @else
@@ -208,5 +215,7 @@
         </div>
     </div>
 </div>
+
+
 
 @endsection

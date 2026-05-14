@@ -7,7 +7,8 @@
 
     {{-- HEADER --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold">📦 Kelola Program Donasi</h4>
+        <h4 class="fw-bold"> Kelola Program Donasi</h4>
+        <!-- <h4 class="fw-bold">📦 Kelola Program Donasi</h4> -->
 
         <a href="{{ route('admin.donasi.index') }}"
            class="btn text-white"
@@ -35,7 +36,7 @@
 
                         @php
                             $persen = ($p->target_dana > 0)
-                                ? min(100, ($p->terkumpul / $p->target_dana) * 100
+                                ? min(100, ($p->terkumpul / $p->target_dana) * 100)
                                 : 0;
                         @endphp
 

@@ -41,8 +41,8 @@ class User extends Authenticatable
         return $this->hasMany(Laporan::class, 'user_id');
     }
 
-    // public function konfirmasi()
-    // {
-    //     return $this->hasMany(KonfirmasiLaporan::class, 'user_id');
-    // }
+     public function konfirmasi()
+     {
+        return $this->hasMany(KonfirmasiLaporan::class, 'user_id');
+     }
 }

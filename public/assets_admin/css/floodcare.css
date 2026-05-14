@@ -3227,6 +3227,7 @@ body {
 .flp-water-tinggi { color: #e74c3c; }
 .flp-water-sedang { color: #e8a82a; }
 .flp-water-rendah { color: #2abe8a; }
+.flp-water-sangat_tinggi { color: #9d174d; font-weight: 600; }
 
 .flp-foto-thumb {
     width: 36px; height: 36px;
@@ -3246,6 +3247,7 @@ body {
 .flp-badge-tinggi     { background: #fff0ee;  color: #c0392b; }
 .flp-badge-sedang     { background: #fff8e8;  color: #8a5a00; }
 .flp-badge-rendah     { background: #eafaf4;  color: #1a7a4a; }
+.flp-badge-sangat_tinggi { background: #fce7f3; color: #9d174d; }
 
 /* ── Pagination ── */
 .flp-pagination {
@@ -3515,3 +3517,492 @@ body {
     background-color: #fff7ed;
     color: #f97316;
 }
+
+/* ── Alamat lokasi link ── */
+.flp-alamat-link {
+    font-size: 12px;
+    color: var(--primary);
+    text-decoration: none;
+    transition: opacity .15s;
+}
+.flp-alamat-link:hover {
+    opacity: .75;
+}
+.flp-alamat-text {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ── Pelapor cell ── */
+.flp-pelapor-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ── Filter card margin ── */
+.flp-filter-card-wrap {
+    margin-bottom: 12px;
+}
+
+/* ── Foto thumb image ── */
+.flp-foto-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* ── Foto box image (detail) ── */
+.flp-foto-box-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* ── Info cell margin top ── */
+.flp-info-cell-mt {
+    margin-top: 8px;
+}
+
+/* ── Status pill margin bottom ── */
+.flp-status-pill-mb {
+    margin-bottom: 16px;
+}
+
+/* ── Textarea catatan admin ── */
+.flp-textarea-catatan {
+    min-height: 100px;
+}
+
+/* ── Breadcrumb detail ── */
+.flp-breadcrumb-wrap {
+    margin-bottom: 4px;
+}
+.flp-breadcrumb-text {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+.flp-breadcrumb-current {
+    color: var(--primary);
+}
+
+/* ── Konfirmasi warga item ── */
+.flp-konfirmasi-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+.flp-konfirmasi-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.flp-konfirmasi-nama {
+    font-size: 13px;
+    font-weight: 600;
+}
+.flp-konfirmasi-akurat {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-left: 6px;
+}
+.flp-konfirmasi-komentar {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+.flp-konfirmasi-time {
+    font-size: 11px;
+    color: #bbb;
+    margin-top: 2px;
+}
+
+/* ── Konfirmasi warga title count ── */
+.flp-konfirmasi-count {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+/* ── Table column widths ── */
+.flp-col-no   { width: 40px; }
+.flp-col-foto { width: 60px; }
+.flp-col-aksi { width: 100px; text-align: center; }
+
+/* ── Form inline (delete) ── */
+.flp-form-inline { display: inline; }
+
+/* ============================================================
+   CREATE / EDIT PAGE — Layout
+   ============================================================ */
+
+.user-create-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 16px;
+    align-items: start;
+}
+
+/* ── Form Card ── */
+.user-create-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.user-create-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+}
+
+.user-create-card-header > .mdi {
+    font-size: 22px;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.user-create-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.user-create-card-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.user-create-form-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.user-create-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 12px 0 8px;
+    position: relative;
+    text-align: center;
+}
+
+.user-create-divider span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--surface);
+    padding: 0 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    white-space: nowrap;
+}
+
+.user-create-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+}
+
+/* ── Info Sidebar ── */
+.user-create-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.user-create-info-card {
+    padding: 20px;
+}
+
+.user-create-info-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 12px;
+}
+
+.user-create-info-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.user-create-info-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.user-create-info-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 14px 0;
+}
+
+.user-create-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.user-create-info-list li {
+    font-size: 12px;
+    color: var(--text-sub);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.user-create-info-list li .mdi {
+    font-size: 15px;
+    color: #2abe8a;
+    flex-shrink: 0;
+}
+
+/* ── Edit page: mini preview ── */
+.user-edit-preview {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+}
+
+.user-edit-preview-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.user-edit-preview-meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .user-create-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .user-create-info {
+        order: -1;
+    }
+}
+
+/* ============================================================
+   PATCH — Password Toggle Fix
+   Tambahkan di akhir file fc-admin.css / user.css
+   ============================================================ */
+
+.fc-input-password-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.fc-input-password-wrap .fc-input {
+    width: 100%;
+    padding-right: 2.8rem; /* biar teks tidak ketutup ikon mata */
+}
+
+.fc-input-password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #aaa;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    line-height: 1;
+    z-index: 2;
+    transition: color .15s;
+}
+
+.fc-input-password-toggle:hover {
+    color: var(--text-sub);
+}
+
+.fc-input-password-toggle .mdi {
+    font-family: 'Material Design Icons' !important;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+    display: inline-block;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   LAPORAN — Filter 2 baris
+   ============================================================ */
+
+.flp-filter-wrap {
+    background: var(--surface);
+    border: 0.5px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.flp-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Search input baris 1 */
+.flp-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+
+.flp-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.flp-search-input {
+    width: 100%;
+    padding: 8px 12px 8px 34px !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    font-size: 13px;
+}
+
+/* Count pill */
+.flp-filter-count-pill {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+/* Select filter baris 2 */
+.flp-filter-select {
+    padding: 8px 32px 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-main);
+    background: var(--surface);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+    min-width: 140px;
+    transition: border .2s;
+}
+
+.flp-filter-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255,102,0,.08);
+}
+
+/* Date input wrapper */
+.flp-date-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.flp-date-icon {
+    position: absolute;
+    left: 10px;
+    font-size: 15px;
+    color: var(--text-muted);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.flp-date-input {
+    padding-left: 32px !important;
+    min-width: 150px;
+    background-image: none !important;
+}
+
+.flp-date-sep {
+    font-size: 13px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.flp-date-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.flp-date-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.flp-date-input {
+    min-width: 140px;
+    background-image: none !important;
+}
+

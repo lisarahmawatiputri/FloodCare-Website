@@ -27,7 +27,7 @@ class AuthController extends Controller
             'provider' => 'email',
             'status' => 'aktif',
             'foto_profil' => null,
-            'alasan_blokir' => null,
+            // 'alasan_blokir' => null,
         ]);
 
         $token = $user->createToken('flutter-token')->plainTextToken;
@@ -89,5 +89,4 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Logout berhasil',
         ]);
-    }
-}
+    }}

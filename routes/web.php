@@ -67,8 +67,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
 
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('laporan/export-pdf', [LaporanController::class, 'exportPdf'])->name('laporan.export-pdf');
     Route::get('/laporan/{id}', [LaporanController::class, 'show'])->name('laporan.show');
-
+    Route::patch('/laporan/{id}/validasi', [LaporanController::class, 'validasi'])->name('laporan.validasi');
+    Route::delete('/laporan/{id}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
     /*
     |--------------------------------------------------------------------------
     | DONASI
@@ -113,12 +115,17 @@ Route::prefix('artikel')->name('artikel.')->group(function () {
 
     });
     
-// USERS
-Route::get('/users', [UserController::class, 'index'])->name('users.index');
-Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
-Route::patch('/users/{id}/status', [UserController::class, 'updateStatus'])->name('users.status');
-Route::patch('/users/{id}/role', [UserController::class, 'updateRole'])->name('users.role');
-Route::patch('/users/{id}/blokir', [UserController::class, 'blokir'])->name('users.blokir');
+    // ===== USERS =====
+    Route::get('/users',               [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/create',        [UserController::class, 'create'])->name('users.create'); 
+    Route::post('/users',              [UserController::class, 'store'])->name('users.store');
+    Route::get('/users/export',        [UserController::class, 'export'])->name('users.export');
+    Route::get('/users/{id}',          [UserController::class, 'show'])->name('users.show');
+    Route::get('/users/{id}/edit',     [UserController::class, 'edit'])->name('users.edit');     
+    Route::put('/users/{id}',          [UserController::class, 'update'])->name('users.update');
+    Route::patch('/users/{id}/status', [UserController::class, 'updateStatus'])->name('users.status');
+    Route::patch('/users/{id}/role',   [UserController::class, 'updateRole'])->name('users.role');
+    Route::patch('/users/{id}/blokir', [UserController::class, 'blokir'])->name('users.blokir');
 
 });
 
