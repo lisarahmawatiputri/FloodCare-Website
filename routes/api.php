@@ -10,34 +10,88 @@ use App\Http\Controllers\Api\ProgramDonasiController;
 use App\Http\Controllers\Api\ArtikelController;
 use App\Http\Controllers\Api\VideoController;
 
+/*
+|--------------------------------------------------------------------------
+| AUTH
+|--------------------------------------------------------------------------
+*/
 
-// PUBLIC (tidak perlu login)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// PROTECTED (harus pakai token)
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/user', function (Request $request) {
+
         return response()->json([
             'success' => true,
             'user' => $request->user(),
         ]);
+
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
+/*
+|--------------------------------------------------------------------------
+| GOOGLE LOGIN
+|--------------------------------------------------------------------------
+*/
+
 Route::post('/auth/google', [GoogleAuthController::class, 'login']);
+
+/*
+|--------------------------------------------------------------------------
+| FORGOT PASSWORD
+|--------------------------------------------------------------------------
+*/
+
 Route::post('/forgot-password', [ForgotPasswordOtpController::class, 'sendOtp']);
+
 Route::post('/reset-password', [ForgotPasswordOtpController::class, 'resetPassword']);
-Route::middleware('auth:sanctum')->post('/donations/pay', [DonationPaymentController::class, 'createPayment']);
-Route::post('/midtrans/notification', [DonationPaymentController::class, 'notification']);
+
+/*
+|--------------------------------------------------------------------------
+| DONASI
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')->post(
+    '/donations/pay',
+    [DonationPaymentController::class, 'createPayment']
+);
+
+Route::post(
+    '/midtrans/notification',
+    [DonationPaymentController::class, 'notification']
+);
+
+Route::post(
+    '/donasi/{id}/simulate-success',
+    [DonationPaymentController::class, 'simulateSuccess']
+);
+
+/*
+|--------------------------------------------------------------------------
+| PROGRAM DONASI
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/program-donasi', [ProgramDonasiController::class, 'index']);
-Route::post('/donasi/{id}/simulate-success', [DonationPaymentController::class, 'simulateSuccess']);
+
+/*
+|--------------------------------------------------------------------------
+| ARTIKEL
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/artikel', [ArtikelController::class, 'index']);
-Route::get('/video', [VideoController::class, 'index']); 
 
-//simulasi pembayaran aja masih lokal hehe
-Route::post('/donasi/{id}/simulate-success', [DonationPaymentController::class, 'simulateSuccess']);
+/*
+|--------------------------------------------------------------------------
+| VIDEO
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/video', [VideoController::class, 'index']);

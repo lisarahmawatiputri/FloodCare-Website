@@ -37,7 +37,8 @@ class ProgramDonasiController extends Controller
         return redirect()->route('admin.donasi.index')
             ->with('success', 'Program donasi berhasil ditambahkan.');
     }
-     public function index()
+
+    public function index()
     {
         $program = ProgramDonasi::where('status', 'aktif')
             ->latest()
@@ -62,6 +63,13 @@ class ProgramDonasiController extends Controller
         ]);
     }
 
+    public function edit($id)
+    {
+        $program = ProgramDonasi::findOrFail($id);
+
+        return view('admin.donasi.edit', compact('program'));
+    }
+
     public function update(Request $request, $id)
     {
         $program = ProgramDonasi::findOrFail($id);
@@ -75,6 +83,7 @@ class ProgramDonasiController extends Controller
         ]);
 
         if ($request->hasFile('foto')) {
+
             if ($program->foto && Storage::disk('public')->exists($program->foto)) {
                 Storage::disk('public')->delete($program->foto);
             }
@@ -84,7 +93,8 @@ class ProgramDonasiController extends Controller
 
         $program->update($data);
 
-        return back()->with('success', 'Program donasi berhasil diupdate.');
+        return redirect()->route('admin.donasi.program')
+            ->with('success', 'Program donasi berhasil diupdate.');
     }
 
     public function destroy($id)
