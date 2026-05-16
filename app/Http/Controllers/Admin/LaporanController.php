@@ -7,6 +7,12 @@ use App\Models\Laporan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\User;
+use Illuminate\Support\Facades\Http;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Messaging\AndroidConfig;
 
 class LaporanController extends Controller
 {
@@ -26,6 +32,46 @@ class LaporanController extends Controller
         return $query;
     }
 
+  private function sendFloodNotification($laporan)
+{
+    $factory = (new Factory)
+        ->withServiceAccount(
+            storage_path('app/firebase/firebase-credentials.json')
+        );
+
+    $messaging = $factory->createMessaging();
+
+    $tokens = User::whereNotNull('fcm_token')
+        ->where('fcm_token', '!=', '')
+        ->distinct()
+        ->pluck('fcm_token')
+        ->toArray();
+
+    foreach ($tokens as $token) {
+     $message = CloudMessage::new()
+    ->toToken($token)
+    ->withAndroidConfig(
+        AndroidConfig::fromArray([
+            'priority' => 'high',
+            'notification' => [
+                'title' => 'Peringatan Banjir',
+                'body' => 'Laporan banjir valid di ' . $laporan->alamat_lokasi,
+                'sound' => 'flood_alert',
+                'channel_id' => 'flood_alert_channel',
+            ],
+        ])
+    )
+    ->withData([
+        'title' => 'Peringatan Banjir',
+        'body' => 'Laporan banjir valid di ' . $laporan->alamat_lokasi,
+        'laporan_id' => (string) $laporan->id,
+        'type' => 'flood_report',
+    ]);
+
+$messaging->send($message);
+
+    }
+}
     public function index(Request $request)
     {
         $query = Laporan::with('pelapor');
@@ -68,24 +114,28 @@ class LaporanController extends Controller
         return view('admin.laporan.show', compact('laporan', 'konfirmasis'));
     }
 
-    public function validasi(Request $request, $id)
-    {
-        $laporan = Laporan::findOrFail($id);
+   public function validasi(Request $request, $id)
+{
+    $laporan = Laporan::findOrFail($id);
+    $statusSebelumnya = $laporan->status_laporan;
 
-        $request->validate([
-            'status_laporan' => 'required|in:menunggu,valid,tidak_valid,diterima',
-            'catatan_admin'  => 'nullable|string',
-        ]);
+    $request->validate([
+        'status_laporan' => 'required|in:menunggu,valid,tidak_valid,diterima',
+        'catatan_admin'  => 'nullable|string',
+    ]);
 
-        // tingkat_risiko tidak perlu diisi manual, otomatis dari model
-        $laporan->update([
-            'status_laporan'  => $request->status_laporan,
-            'catatan_admin'   => $request->catatan_admin,
-            'divalidasi_oleh' => Auth::id(),
-        ]);
+    $laporan->update([
+        'status_laporan'  => $request->status_laporan,
+        'catatan_admin'   => $request->catatan_admin,
+        'divalidasi_oleh' => Auth::id(),
+    ]);
 
-        return back()->with('success', 'Laporan berhasil divalidasi!');
+    if ($statusSebelumnya !== 'valid' && $request->status_laporan === 'valid') {
+        $this->sendFloodNotification($laporan);
     }
+
+    return back()->with('success', 'Laporan berhasil divalidasi!');
+}
 
     public function destroy($id)
     {

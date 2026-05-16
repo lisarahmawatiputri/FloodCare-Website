@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\DonationPaymentController;
 use App\Http\Controllers\Api\ProgramDonasiController;
 use App\Http\Controllers\Api\ArtikelController;
 use App\Http\Controllers\Api\VideoController;
+use App\Http\Controllers\Api\LaporanController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -32,7 +34,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout']);
 });
-
+Route::middleware('auth:sanctum')->post('/profile/photo', [AuthController::class, 'updateProfilePhoto']);
+Route::middleware('auth:sanctum')->post('/fcm-token', [AuthController::class, 'updateFcmToken']);
 /*
 |--------------------------------------------------------------------------
 | GOOGLE LOGIN
@@ -50,6 +53,8 @@ Route::post('/auth/google', [GoogleAuthController::class, 'login']);
 Route::post('/forgot-password', [ForgotPasswordOtpController::class, 'sendOtp']);
 
 Route::post('/reset-password', [ForgotPasswordOtpController::class, 'resetPassword']);
+Route::middleware('auth:sanctum')->post('/verify-password', [AuthController::class, 'verifyPassword']);
+Route::middleware('auth:sanctum')->post('/change-password', [AuthController::class, 'changePassword']);
 
 /*
 |--------------------------------------------------------------------------
@@ -87,6 +92,7 @@ Route::get('/program-donasi', [ProgramDonasiController::class, 'index']);
 */
 
 Route::get('/artikel', [ArtikelController::class, 'index']);
+Route::get('/artikel-terbaru', [ArtikelController::class, 'latest']);
 
 /*
 |--------------------------------------------------------------------------
@@ -95,3 +101,14 @@ Route::get('/artikel', [ArtikelController::class, 'index']);
 */
 
 Route::get('/video', [VideoController::class, 'index']);
+Route::get('/video-terbaru', [VideoController::class, 'latest']);
+
+/*
+|--------------------------------------------------------------------------
+| LAPORAN
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')->get('/laporan-banjir', [LaporanController::class, 'index']);
+Route::middleware('auth:sanctum')->post('/laporan-banjir', [LaporanController::class, 'store']);
+
