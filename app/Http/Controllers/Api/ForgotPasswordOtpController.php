@@ -43,7 +43,7 @@ class ForgotPasswordOtpController extends Controller
         $request->validate([
             'email' => 'required|email|exists:users,email',
             'otp' => 'required|digits:4',
-            'password' => 'required|min:8|confirmed',
+            'password' => ['required','string','min:8','regex:/[a-z]/','regex:/[A-Z]/','regex:/[@$!%*#?&]/','confirmed',],
         ]);
 
         $record = DB::table('password_reset_otps')
