@@ -24,7 +24,7 @@ use App\Models\Donasi;
 
 Route::get('/', function () {
     return view('LandingPage.index');
-})->name('home');
+})->name('landing');
 
 Route::get('/blog', function () {
     return view('LandingPage.blog');

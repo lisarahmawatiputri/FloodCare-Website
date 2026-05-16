@@ -1,59 +1,49 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>@yield('title', 'FloodCare')</title>
-  <meta name="description" content="">
-  <meta name="keywords" content="">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="FloodCare — Laporkan banjir di sekitarmu, lebih cepat & lebih sigap. Aplikasi pelaporan dan edukasi banjir." />
+    <title>@yield('title', 'FloodCare — Lapor & Pantau Banjir Realtime')</title>
 
-  <!-- Favicons -->
-  <link href="{{ asset('assets/img/FloodCare.svg') }}" rel="icon">
-  <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+    {{-- Tailwind via CDN (ganti dengan build asset Vite jika sudah disiapkan) --}}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: { DEFAULT: '#ff6600', dark: '#e65a00', light: '#ff8533', soft: '#fff4ec' },
+              ink: '#0f172a',
+            },
+            fontFamily: { sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'] },
+            boxShadow: { soft: '0 10px 40px -15px rgba(15,23,42,.15)' },
+          }
+        }
+      }
+    </script>
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100..900;1,100..900&family=Nunito:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    {{-- Fonts --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Vendor CSS Files -->
-  <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/vendor/aos/aos.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+    {{-- Custom styles --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}">
 
-  <!-- Main CSS File -->
-  <link href="{{ asset('assets/css/main.css') }}" rel="stylesheet">
-
-  @yield('styles')
+    @stack('head')
 </head>
+<body class="bg-white text-ink antialiased">
 
-<body class="@yield('body_class', 'index-page')">
+    @include('LandingPage.partials.navbar')
 
-  @yield('content')
+    <main>
+        @yield('content')
+    </main>
 
-  <!-- Scroll Top -->
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
-    <i class="bi bi-arrow-up-short"></i>
-  </a>
+    @include('LandingPage.partials.footer')
 
-  <!-- Vendor JS Files -->
-  <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-  <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
-  <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
-  <script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
-  <script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
-  <script src="{{ asset('assets/vendor/imagesloaded/imagesloaded.pkgd.min.js') }}"></script>
-  <script src="{{ asset('assets/vendor/isotope-layout/isotope.pkgd.min.js') }}"></script>
-  <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
-
-  <!-- Main JS File -->
-  <script src="{{ asset('assets/js/main.js') }}"></script>
-
-
-
+    <script src="{{ asset('assets/js/main.js') }}"></script>
+    @stack('scripts')
 </body>
-
 </html>
