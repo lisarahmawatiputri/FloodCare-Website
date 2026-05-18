@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -15,7 +18,7 @@ class AuthController extends Controller
             'nama_lengkap' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'no_telepon' => ['required', 'string', 'max:20'],
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'password' => ['required','string','min:8','regex:/[a-z]/','regex:/[A-Z]/','regex:/[@$!%*#?&]/','confirmed',],
         ]);
 
         $user = User::create([
@@ -38,6 +41,104 @@ class AuthController extends Controller
             'token' => $token,
             'user' => $user,
         ], 201);
+    }
+
+    public function verifyPassword(Request $request)
+    {
+        $user = $request->user();
+
+        if (
+            in_array(strtolower($user->provider ?? ''), ['google', 'gmail', 'google.com']) ||
+            !empty($user->google_id)
+        ) {
+            return response()->json([
+                'message' => 'Akun Google tidak dapat mengganti password dari aplikasi.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+        ]);
+
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['Password lama tidak sesuai.'],
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Password lama valid.',
+        ]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = $request->user();
+
+        if (
+            in_array(strtolower($user->provider ?? ''), ['google', 'gmail', 'google.com']) ||
+            !empty($user->google_id)
+        ) {
+            return response()->json([
+                'message' => 'Akun Google tidak dapat mengganti password dari aplikasi.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'password' => ['required','string','min:8','regex:/[a-z]/','regex:/[A-Z]/','regex:/[@$!%*#?&]/','confirmed',],
+        ]);
+
+        if (!Hash::check($validated['current_password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['Password lama tidak sesuai.'],
+            ]);
+        }
+
+        $user->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return response()->json([
+            'message' => 'Password berhasil diperbarui.',
+        ]);
+    }
+
+    public function updateProfilePhoto(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'foto_profil' => 'required|image|mimes:jpg,jpeg,png|max:4096',
+        ]);
+
+        if (
+            $user->foto_profil &&
+            !Str::startsWith($user->foto_profil, ['http://', 'https://']) &&
+            Storage::disk('public')->exists($user->foto_profil)
+        ) {
+            Storage::disk('public')->delete($user->foto_profil);
+        }
+
+        $path = $request->file('foto_profil')->store('foto_profil', 'public');
+
+        $user->update([
+            'foto_profil' => $path,
+        ]);
+
+        return response()->json([
+            'message' => 'Foto profil berhasil diperbarui.',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name ?? $user->nama_lengkap,
+                'nama_lengkap' => $user->nama_lengkap ?? $user->name,
+                'email' => $user->email,
+                'foto_profil' => $path,
+                'foto_profil_url' => asset('storage/' . $path),
+                'provider' => $user->provider,
+                'google_id' => $user->google_id ?? null,
+            ],
+        ]);
     }
 
     public function login(Request $request)
@@ -72,6 +173,20 @@ class AuthController extends Controller
             'user' => $user,
         ]);
     }
+  public function updateFcmToken(Request $request)
+{
+    $request->validate([
+        'fcm_token' => 'required|string',
+    ]);
+
+    $request->user()->update([
+        'fcm_token' => $request->fcm_token,
+    ]);
+
+    return response()->json([
+        'message' => 'FCM token berhasil disimpan',
+    ]);
+}
 
     public function user(Request $request)
     {

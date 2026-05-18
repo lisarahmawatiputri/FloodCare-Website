@@ -7,6 +7,12 @@ use App\Models\Laporan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\User;
+use Illuminate\Support\Facades\Http;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Messaging\AndroidConfig;
 
 class LaporanController extends Controller
 {
@@ -44,6 +50,53 @@ class LaporanController extends Controller
         }
 
         return $query;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | NOTIFIKASI BANJIR
+    |--------------------------------------------------------------------------
+    */
+
+    private function sendFloodNotification($laporan)
+    {
+        $factory = (new Factory)
+            ->withServiceAccount(
+                storage_path('app/firebase/firebase-credentials.json')
+            );
+
+        $messaging = $factory->createMessaging();
+
+        $tokens = User::whereNotNull('fcm_token')
+            ->where('fcm_token', '!=', '')
+            ->distinct()
+            ->pluck('fcm_token')
+            ->toArray();
+
+        foreach ($tokens as $token) {
+
+            $message = CloudMessage::new()
+                ->toToken($token)
+                ->withAndroidConfig(
+                    AndroidConfig::fromArray([
+                        'priority' => 'high',
+                        'notification' => [
+                            'title' => 'Peringatan Banjir',
+                            'body' => 'Laporan banjir valid di ' . $laporan->alamat_lokasi,
+                            'sound' => 'flood_alert',
+                            'channel_id' => 'flood_alert_channel',
+                        ],
+                    ])
+                )
+                ->withData([
+                    'title' => 'Peringatan Banjir',
+                    'body' => 'Laporan banjir valid di ' . $laporan->alamat_lokasi,
+                    'laporan_id' => (string) $laporan->id,
+                    'type' => 'flood_report',
+                ]);
+
+            $messaging->send($message);
+        }
     }
 
     /*
@@ -160,24 +213,32 @@ class LaporanController extends Controller
     {
         $laporan = Laporan::findOrFail($id);
 
+        $statusSebelumnya = $laporan->status_laporan;
+
         $request->validate([
             'status_laporan' => 'required|in:menunggu,valid,tidak_valid,diterima',
-            'tingkat_risiko' => 'required|in:rendah,sedang,tinggi,sangat_tinggi',
+            'tingkat_risiko' => 'nullable|in:rendah,sedang,tinggi,sangat_tinggi',
             'catatan_admin'  => 'nullable|string',
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | UPDATE DATA LAPORAN
-        |--------------------------------------------------------------------------
-        */
-
         $laporan->update([
             'status_laporan'  => $request->status_laporan,
-            'tingkat_risiko'  => $request->tingkat_risiko,
+            'tingkat_risiko'  => $request->tingkat_risiko ?? $laporan->tingkat_risiko,
             'catatan_admin'   => $request->catatan_admin,
             'divalidasi_oleh' => Auth::id(),
         ]);
+
+        if (
+    $statusSebelumnya !== 'valid' &&
+    $request->status_laporan === 'valid'
+    ) {
+    try {
+        $this->sendFloodNotification($laporan);
+    } catch (\Throwable $e) {
+        // Firebase belum terkonfigurasi, skip notifikasi
+        \Log::warning('Firebase notification failed: ' . $e->getMessage());
+    }
+    }
 
         return back()->with(
             'success',

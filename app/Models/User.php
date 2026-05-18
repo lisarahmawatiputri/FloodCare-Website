@@ -21,6 +21,7 @@ class User extends Authenticatable
         'provider',
         'status',
         'alasan_blokir',
+        'fcm_token',
     ];
 
     protected $hidden = [

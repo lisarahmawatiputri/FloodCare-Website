@@ -24,7 +24,7 @@ use App\Models\Donasi;
 
 Route::get('/', function () {
     return view('LandingPage.index');
-})->name('home');
+})->name('landing');
 
 Route::get('/blog', function () {
     return view('LandingPage.blog');
@@ -82,7 +82,7 @@ Route::get('/dashboard', function () {
     |--------------------------------------------------------------------------
     */
 
-    $laporanTerbaru = Laporan::orderBy('created_at', 'desc')
+    $laporanTerbaru = Laporan::orderBy('updated_at', 'desc')
         ->take(5)
         ->get();
 
@@ -126,8 +126,11 @@ Route::get('/dashboard', function () {
     |--------------------------------------------------------------------------
     */
 
-    $rendahBulanIni = Laporan::whereMonth('created_at', now()->month)
-        ->where('tingkat_risiko', 'rendah')
+    $rendahBulanIni = Laporan::where('tingkat_risiko', 'rendah')
+        ->where(function ($q) {
+            $q->whereMonth('created_at', now()->month)
+              ->orWhereMonth('updated_at', now()->month);
+        })
         ->count();
 
     return view('admin.dashboard', compact(
@@ -210,7 +213,7 @@ Route::middleware(['auth'])
         |--------------------------------------------------------------------------
         */
 
-        $laporanTerbaru = Laporan::orderBy('created_at', 'desc')
+        $laporanTerbaru = Laporan::orderBy('updated_at', 'desc')
             ->take(5)
             ->get();
 
@@ -254,8 +257,11 @@ Route::middleware(['auth'])
         |--------------------------------------------------------------------------
         */
 
-        $rendahBulanIni = Laporan::whereMonth('created_at', now()->month)
-            ->where('tingkat_risiko', 'rendah')
+        $rendahBulanIni = Laporan::where('tingkat_risiko', 'rendah')
+            ->where(function ($q) {
+                $q->whereMonth('created_at', now()->month)
+                  ->orWhereMonth('updated_at', now()->month);
+            })
             ->count();
 
         return view('admin.dashboard', compact(
