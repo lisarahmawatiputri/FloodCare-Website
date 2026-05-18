@@ -24,37 +24,89 @@ class Laporan extends Model
         'divalidasi_oleh',
     ];
 
-    // Auto klasifikasi saat tinggi_banjir_cm diisi
+    /*
+    |--------------------------------------------------------------------------
+    | AUTO KLASIFIKASI RISIKO
+    |--------------------------------------------------------------------------
+    */
+
     public static function klasifikasiRisiko(float $tinggi): string
     {
-        if ($tinggi < 30)          return 'rendah';
-        if ($tinggi < 80)          return 'sedang';
-        if ($tinggi < 150)         return 'tinggi';
+        if ($tinggi < 30) {
+            return 'rendah';
+        }
+
+        if ($tinggi < 80) {
+            return 'sedang';
+        }
+
+        if ($tinggi < 150) {
+            return 'tinggi';
+        }
+
         return 'sangat_tinggi';
     }
 
-    // Boot: otomatis set tingkat_risiko setiap kali create/update
+    /*
+    |--------------------------------------------------------------------------
+    | AUTO SET RISIKO SAAT CREATE
+    |--------------------------------------------------------------------------
+    |
+    | HANYA dijalankan saat laporan pertama dibuat.
+    | Jadi admin masih bisa edit tingkat_risiko manual
+    | tanpa dioverwrite otomatis.
+    |
+    */
+
     protected static function booted(): void
     {
-        static::saving(function ($laporan) {
-            if (!is_null($laporan->tinggi_banjir_cm)) {
-                $laporan->tingkat_risiko = self::klasifikasiRisiko((float) $laporan->tinggi_banjir_cm);
+        static::creating(function ($laporan) {
+
+            if (
+                empty($laporan->tingkat_risiko) &&
+                !is_null($laporan->tinggi_banjir_cm)
+            ) {
+
+                $laporan->tingkat_risiko = self::klasifikasiRisiko(
+                    (float) $laporan->tinggi_banjir_cm
+                );
             }
         });
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELASI PELAPOR
+    |--------------------------------------------------------------------------
+    */
 
     public function pelapor()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | RELASI VALIDATOR
+    |--------------------------------------------------------------------------
+    */
+
     public function validator()
     {
         return $this->belongsTo(User::class, 'divalidasi_oleh');
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | RELASI KONFIRMASI
+    |--------------------------------------------------------------------------
+    */
+
     public function konfirmasi()
     {
-        return $this->hasMany(KonfirmasiLaporan::class, 'laporan_id');
+        return $this->hasMany(
+            KonfirmasiLaporan::class,
+            'laporan_id'
+        );
     }
 }

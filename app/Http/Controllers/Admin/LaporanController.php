@@ -10,63 +10,151 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class LaporanController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | FILTER DATA
+    |--------------------------------------------------------------------------
+    */
+
     private function applyFilters($query, Request $request)
     {
         if ($request->search) {
-            $query->where(function($q) use ($request) {
-                $q->where('judul', 'like', '%'.$request->search.'%')
-                  ->orWhere('alamat_lokasi', 'like', '%'.$request->search.'%');
+
+            $query->where(function ($q) use ($request) {
+
+                $q->where('judul', 'like', '%' . $request->search . '%')
+                  ->orWhere('alamat_lokasi', 'like', '%' . $request->search . '%');
             });
         }
-        if ($request->status)      $query->where('status_laporan', $request->status);
-        if ($request->risiko)      $query->where('tingkat_risiko', $request->risiko);
-        if ($request->tanggal_dari) $query->whereDate('created_at', '>=', $request->tanggal_dari);
-        if ($request->tanggal_sampai) $query->whereDate('created_at', '<=', $request->tanggal_sampai);
+
+        if ($request->status) {
+            $query->where('status_laporan', $request->status);
+        }
+
+        if ($request->risiko) {
+            $query->where('tingkat_risiko', $request->risiko);
+        }
+
+        if ($request->tanggal_dari) {
+            $query->whereDate('created_at', '>=', $request->tanggal_dari);
+        }
+
+        if ($request->tanggal_sampai) {
+            $query->whereDate('created_at', '<=', $request->tanggal_sampai);
+        }
 
         return $query;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | HALAMAN LIST LAPORAN
+    |--------------------------------------------------------------------------
+    */
+
     public function index(Request $request)
     {
         $query = Laporan::with('pelapor');
+
         $this->applyFilters($query, $request);
 
-        $laporans        = $query->latest()->paginate(10)->withQueryString();
-        $countMenunggu   = Laporan::where('status_laporan', 'menunggu')->count();
-        $countValid      = Laporan::where('status_laporan', 'valid')->count();
-        $countTidakValid = Laporan::where('status_laporan', 'tidak_valid')->count();
-        $totalLaporan    = $query->toBase()->getCountForPagination();
+        $laporans = $query
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        $countMenunggu = Laporan::where('status_laporan', 'menunggu')
+            ->count();
+
+        $countValid = Laporan::where('status_laporan', 'valid')
+            ->count();
+
+        $countTidakValid = Laporan::where('status_laporan', 'tidak_valid')
+            ->count();
+
+        $totalLaporan = $query
+            ->toBase()
+            ->getCountForPagination();
 
         return view('admin.laporan.index', compact(
-            'laporans', 'countMenunggu', 'countValid', 'countTidakValid', 'totalLaporan'
+            'laporans',
+            'countMenunggu',
+            'countValid',
+            'countTidakValid',
+            'totalLaporan'
         ));
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | EXPORT PDF
+    |--------------------------------------------------------------------------
+    */
 
     public function exportPdf(Request $request)
     {
         $query = Laporan::with('pelapor');
+
         $this->applyFilters($query, $request);
 
-        $laporans        = $query->latest()->get();
-        $countMenunggu   = Laporan::where('status_laporan', 'menunggu')->count();
-        $countValid      = Laporan::where('status_laporan', 'valid')->count();
-        $countTidakValid = Laporan::where('status_laporan', 'tidak_valid')->count();
-        $exportedAt      = now()->format('d M Y, H:i');
+        $laporans = $query
+            ->latest()
+            ->get();
+
+        $countMenunggu = Laporan::where('status_laporan', 'menunggu')
+            ->count();
+
+        $countValid = Laporan::where('status_laporan', 'valid')
+            ->count();
+
+        $countTidakValid = Laporan::where('status_laporan', 'tidak_valid')
+            ->count();
+
+        $exportedAt = now()->format('d M Y, H:i');
 
         $pdf = Pdf::loadView('admin.laporan.export-pdf', compact(
-            'laporans', 'countMenunggu', 'countValid', 'countTidakValid', 'exportedAt'
+            'laporans',
+            'countMenunggu',
+            'countValid',
+            'countTidakValid',
+            'exportedAt'
         ))->setPaper('a4', 'landscape');
 
-        return $pdf->download('laporan-banjir-' . now()->format('Ymd-His') . '.pdf');
+        return $pdf->download(
+            'laporan-banjir-' . now()->format('Ymd-His') . '.pdf'
+        );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DETAIL LAPORAN
+    |--------------------------------------------------------------------------
+    */
 
     public function show($id)
     {
-        $laporan     = Laporan::with(['pelapor', 'validator', 'konfirmasi.user'])->findOrFail($id);
-        $konfirmasis = $laporan->konfirmasi()->with('user')->latest('created_at')->get();
+        $laporan = Laporan::with([
+            'pelapor',
+            'validator',
+            'konfirmasi.user'
+        ])->findOrFail($id);
 
-        return view('admin.laporan.show', compact('laporan', 'konfirmasis'));
+        $konfirmasis = $laporan->konfirmasi()
+            ->with('user')
+            ->latest('created_at')
+            ->get();
+
+        return view('admin.laporan.show', compact(
+            'laporan',
+            'konfirmasis'
+        ));
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDASI LAPORAN
+    |--------------------------------------------------------------------------
+    */
 
     public function validasi(Request $request, $id)
     {
@@ -74,25 +162,43 @@ class LaporanController extends Controller
 
         $request->validate([
             'status_laporan' => 'required|in:menunggu,valid,tidak_valid,diterima',
+            'tingkat_risiko' => 'required|in:rendah,sedang,tinggi,sangat_tinggi',
             'catatan_admin'  => 'nullable|string',
         ]);
 
-        // tingkat_risiko tidak perlu diisi manual, otomatis dari model
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE DATA LAPORAN
+        |--------------------------------------------------------------------------
+        */
+
         $laporan->update([
             'status_laporan'  => $request->status_laporan,
+            'tingkat_risiko'  => $request->tingkat_risiko,
             'catatan_admin'   => $request->catatan_admin,
             'divalidasi_oleh' => Auth::id(),
         ]);
 
-        return back()->with('success', 'Laporan berhasil divalidasi!');
+        return back()->with(
+            'success',
+            'Laporan berhasil divalidasi!'
+        );
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | HAPUS LAPORAN
+    |--------------------------------------------------------------------------
+    */
 
     public function destroy($id)
     {
         $laporan = Laporan::findOrFail($id);
+
         $laporan->delete();
 
-        return redirect()->route('admin.laporan.index')
+        return redirect()
+            ->route('admin.laporan.index')
             ->with('success', 'Laporan berhasil dihapus!');
     }
 }

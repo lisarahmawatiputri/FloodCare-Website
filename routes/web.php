@@ -82,7 +82,7 @@ Route::get('/dashboard', function () {
     |--------------------------------------------------------------------------
     */
 
-    $laporanTerbaru = Laporan::latest()
+    $laporanTerbaru = Laporan::orderBy('created_at', 'desc')
         ->take(5)
         ->get();
 
@@ -102,6 +102,7 @@ Route::get('/dashboard', function () {
             return trim(end($pecah));
         })
         ->map(function ($items, $nama) {
+
             return (object) [
                 'nama' => $nama,
                 'jumlah' => count($items)
@@ -116,7 +117,7 @@ Route::get('/dashboard', function () {
     |--------------------------------------------------------------------------
     */
 
-    $butuhValidasi = Laporan::where('status_laporan', 'pending')
+    $butuhValidasi = Laporan::where('status_laporan', 'menunggu')
         ->count();
 
     /*
@@ -189,6 +190,12 @@ Route::middleware(['auth'])
 
         $totalUser = User::count();
 
+        /*
+        |--------------------------------------------------------------------------
+        | DONASI
+        |--------------------------------------------------------------------------
+        */
+
         $totalDonasi = Donasi::whereIn('status_pembayaran', ['sukses', 'success'])
             ->sum('nominal');
 
@@ -197,9 +204,21 @@ Route::middleware(['auth'])
             ->distinct('user_id')
             ->count('user_id');
 
-        $laporanTerbaru = Laporan::latest()
+        /*
+        |--------------------------------------------------------------------------
+        | LAPORAN TERBARU
+        |--------------------------------------------------------------------------
+        */
+
+        $laporanTerbaru = Laporan::orderBy('created_at', 'desc')
             ->take(5)
             ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | SEBARAN WILAYAH
+        |--------------------------------------------------------------------------
+        */
 
         $sebaranKecamatan = Laporan::get()
             ->groupBy(function ($item) {
@@ -211,6 +230,7 @@ Route::middleware(['auth'])
                 return trim(end($pecah));
             })
             ->map(function ($items, $nama) {
+
                 return (object) [
                     'nama' => $nama,
                     'jumlah' => count($items)
@@ -219,8 +239,20 @@ Route::middleware(['auth'])
             ->sortByDesc('jumlah')
             ->take(6);
 
-        $butuhValidasi = Laporan::where('status_laporan', 'pending')
+        /*
+        |--------------------------------------------------------------------------
+        | VALIDASI
+        |--------------------------------------------------------------------------
+        */
+
+        $butuhValidasi = Laporan::where('status_laporan', 'menunggu')
             ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | LAPORAN RENDAH BULAN INI
+        |--------------------------------------------------------------------------
+        */
 
         $rendahBulanIni = Laporan::whereMonth('created_at', now()->month)
             ->where('tingkat_risiko', 'rendah')
