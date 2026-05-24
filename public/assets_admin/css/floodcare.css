@@ -559,6 +559,7 @@ body {
     flex-shrink: 0;
 }
 
+.laporan-dot.sangat_tinggi  { background: #ff1100; }
 .laporan-dot.tinggi  { background: #ff6600; }
 .laporan-dot.sedang  { background: #e8a82a; }
 .laporan-dot.rendah  { background: #2abe8a; }
@@ -587,6 +588,7 @@ body {
     white-space: nowrap;
 }
 
+.status-badge.sangat_tinggi { background: #fff3eb; color: #ff1100; }
 .status-badge.tinggi { background: #fff3eb; color: #ff6600; }
 .status-badge.sedang { background: #fff8e8; color: #c28000; }
 .status-badge.rendah { background: #eafaf4; color: #1a8a5e; }

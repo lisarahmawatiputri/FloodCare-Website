@@ -26,25 +26,6 @@ Route::get('/', function () {
     return view('LandingPage.index');
 })->name('landing');
 
-Route::get('/blog', function () {
-    return view('LandingPage.blog');
-})->name('blog');
-
-Route::get('/blog-details', function () {
-    return view('LandingPage.blog-details');
-})->name('blog.details');
-
-Route::get('/portfolio-details', function () {
-    return view('LandingPage.portofolio-details');
-})->name('portfolio');
-
-Route::get('/service-details', function () {
-    return view('LandingPage.service-details');
-})->name('service');
-
-Route::get('/starter-page', function () {
-    return view('LandingPage.starter-page');
-})->name('starter-page');
 
 /*
 |--------------------------------------------------------------------------
@@ -93,24 +74,30 @@ Route::get('/dashboard', function () {
     */
 
     $sebaranKecamatan = Laporan::get()
-        ->groupBy(function ($item) {
+    ->groupBy(function ($item) {
+        $alamat = trim($item->alamat_lokasi ?? '');
 
-            $alamat = $item->alamat_lokasi ?? '-';
+        if (preg_match('/Kecamatan\s+([^,]+)/i', $alamat, $matches)) {
+            return trim($matches[1]);
+        }
 
-            $pecah = explode(',', $alamat);
-
-            return trim(end($pecah));
-        })
-        ->map(function ($items, $nama) {
-
-            return (object) [
-                'nama' => $nama,
-                'jumlah' => count($items)
-            ];
-        })
-        ->sortByDesc('jumlah')
-        ->take(6);
-
+        return null; // tidak ada kecamatan
+    })
+    ->filter(function ($items, $nama) {
+        // Buang yang null, kosong, atau sampah
+        if (is_null($nama) || trim($nama) === '') return false;
+        if (strlen(trim($nama)) <= 2) return false;
+        return true;
+    })
+    ->map(function ($items, $nama) {
+        return (object) [
+            'nama'   => $nama,
+            'jumlah' => count($items)
+        ];
+    })
+    ->sortByDesc('jumlah')
+    ->take(6);
+    
     /*
     |--------------------------------------------------------------------------
     | VALIDASI
@@ -119,6 +106,7 @@ Route::get('/dashboard', function () {
 
     $butuhValidasi = Laporan::where('status_laporan', 'menunggu')
         ->count();
+        
 
     /*
     |--------------------------------------------------------------------------
@@ -224,29 +212,29 @@ Route::middleware(['auth'])
         */
 
         $sebaranKecamatan = Laporan::get()
-            ->groupBy(function ($item) {
+    ->groupBy(function ($item) {
+        $alamat = trim($item->alamat_lokasi ?? '');
 
-                $alamat = $item->alamat_lokasi ?? '-';
+        if (preg_match('/Kecamatan\s+([^,]+)/i', $alamat, $matches)) {
+            return trim($matches[1]);
+        }
 
-                $pecah = explode(',', $alamat);
-
-                return trim(end($pecah));
-            })
-            ->map(function ($items, $nama) {
-
-                return (object) [
-                    'nama' => $nama,
-                    'jumlah' => count($items)
-                ];
-            })
-            ->sortByDesc('jumlah')
-            ->take(6);
-
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI
-        |--------------------------------------------------------------------------
-        */
+        return null; // tidak ada kecamatan
+    })
+    ->filter(function ($items, $nama) {
+        // Buang yang null, kosong, atau sampah
+        if (is_null($nama) || trim($nama) === '') return false;
+        if (strlen(trim($nama)) <= 2) return false;
+        return true;
+    })
+    ->map(function ($items, $nama) {
+        return (object) [
+            'nama'   => $nama,
+            'jumlah' => count($items)
+        ];
+    })
+    ->sortByDesc('jumlah')
+    ->take(6);
 
         $butuhValidasi = Laporan::where('status_laporan', 'menunggu')
             ->count();

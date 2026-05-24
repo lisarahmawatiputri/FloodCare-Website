@@ -1,6 +1,6 @@
 @extends('LandingPage.Layouts.app')
 
-@section('title', 'FloodCare — Lapor & Pantau Banjir Realtime')
+@section('title', 'FloodCare')
 
 @section('content')
     @include('LandingPage.Partials.hero')

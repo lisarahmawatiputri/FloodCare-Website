@@ -24,12 +24,6 @@ class Laporan extends Model
         'divalidasi_oleh',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | AUTO KLASIFIKASI RISIKO
-    |--------------------------------------------------------------------------
-    */
-
     public static function klasifikasiRisiko(float $tinggi): string
     {
         if ($tinggi < 30) {
@@ -46,17 +40,6 @@ class Laporan extends Model
 
         return 'sangat_tinggi';
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | AUTO SET RISIKO SAAT CREATE
-    |--------------------------------------------------------------------------
-    |
-    | HANYA dijalankan saat laporan pertama dibuat.
-    | Jadi admin masih bisa edit tingkat_risiko manual
-    | tanpa dioverwrite otomatis.
-    |
-    */
 
     protected static function booted(): void
     {

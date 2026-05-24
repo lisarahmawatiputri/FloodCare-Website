@@ -111,10 +111,9 @@ $color    = $colors[crc32($user->email) % count($colors)];
 
     </div>
 
-    {{-- KOLOM KANAN --}}
     <div>
 
-        {{-- ========== SUPERADMIN: stat keduanya + tab laporan & konfirmasi ========== --}}
+        {{-- SUPERADMIN--}}
         @if($user->role === 'superadmin')
 
         <div class="user-stat-mini-grid">
@@ -131,10 +130,10 @@ $color    = $colors[crc32($user->email) % count($colors)];
                 <div class="user-stat-mini-icon green">
                     <i class="mdi mdi-check-circle-outline"></i>
                 </div>
-                <div>
+                <!-- <div>
                     <div class="user-stat-mini-num">{{ $totalKonfirmasi }}</div>
                     <div class="user-stat-mini-label">Konfirmasi laporan</div>
-                </div>
+                </div> -->
             </div>
         </div>
 
@@ -162,7 +161,7 @@ $color    = $colors[crc32($user->email) % count($colors)];
                                 <td class="user-no">{{ $i + 1 }}</td>
                                 <td class="user-nama">{{ $lap->judul }}</td>
                                 <td>
-                                    <span class="user-tinggi-{{ $risiko }}">{{ $lap->tinggi_air ?? '—' }} cm</span>
+                                    <span class="user-tinggi-{{ $risiko }}">{{ $lap->tinggi_banjir_cm ?? '—' }} cm</span>
                                 </td>
                                 <td>
                                     <span class="status-badge {{ $risiko }}">{{ ucfirst($risiko) }}</span>
@@ -242,7 +241,7 @@ $color    = $colors[crc32($user->email) % count($colors)];
                                 <td class="user-no">{{ $i + 1 }}</td>
                                 <td class="user-nama">{{ $lap->judul }}</td>
                                 <td>
-                                    <span class="user-tinggi-{{ $risiko }}">{{ $lap->tinggi_air ?? '—' }} cm</span>
+                                    <span class="user-tinggi-{{ $risiko }}">{{ $lap->tinggi_banjir_cm ?? '—' }} cm</span>
                                 </td>
                                 <td>
                                     <span class="status-badge {{ $risiko }}">{{ ucfirst($risiko) }}</span>
@@ -273,7 +272,7 @@ $color    = $colors[crc32($user->email) % count($colors)];
             <div class="user-stat-mini-label">Laporan divalidasi</div>
         </div>
     </div>
-    <div class="user-stat-mini">
+    <!-- <div class="user-stat-mini">
         <div class="user-stat-mini-icon green">
             <i class="mdi mdi-check-circle-outline"></i>
         </div>
@@ -281,13 +280,12 @@ $color    = $colors[crc32($user->email) % count($colors)];
             <div class="user-stat-mini-num">{{ $totalKonfirmasi }}</div>
             <div class="user-stat-mini-label">Konfirmasi laporan</div>
         </div>
-    </div>
+    </div> -->
 </div>
 
 <div class="user-tab-card">
     <div class="user-tab-header">
         <button class="user-tab-btn active" data-tab="validasi">Laporan divalidasi</button>
-        <button class="user-tab-btn" data-tab="konfirmasi">Konfirmasi</button>
     </div>
     <div class="user-tab-content">
 
@@ -325,7 +323,7 @@ $color    = $colors[crc32($user->email) % count($colors)];
             </table>
         </div>
 
-        {{-- Tab konfirmasi --}}
+        <!-- {{-- Tab konfirmasi --}}
         <div class="user-tab-pane" id="tab-konfirmasi">
             <table class="user-inner-table">
                 <thead>
@@ -349,7 +347,7 @@ $color    = $colors[crc32($user->email) % count($colors)];
                     @endforelse
                 </tbody>
             </table>
-        </div>
+        </div> -->
 
     </div>
 </div>

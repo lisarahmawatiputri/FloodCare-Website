@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Laporan;
+use App\Observers\LaporanObserver;
 use Illuminate\Support\ServiceProvider;
+
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +23,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Laporan::observe(LaporanObserver::class);
     }
 }
