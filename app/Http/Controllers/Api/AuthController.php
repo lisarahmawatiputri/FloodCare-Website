@@ -18,7 +18,7 @@ class AuthController extends Controller
             'nama_lengkap' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'no_telepon' => ['required', 'string', 'max:20'],
-            'password' => ['required','string','min:8','regex:/[a-z]/','regex:/[A-Z]/','regex:/[@$!%*#?&]/','confirmed',],
+            'password' => ['required','string','min:8','regex:/[a-z]/','regex:/[A-Z]/','regex:/[@$!%*#?&_]/','confirmed',],
         ]);
 
         $user = User::create([
@@ -86,7 +86,7 @@ class AuthController extends Controller
 
         $validated = $request->validate([
             'current_password' => 'required|string',
-            'password' => ['required','string','min:8','regex:/[a-z]/','regex:/[A-Z]/','regex:/[@$!%*#?&]/','confirmed',],
+            'password' => ['required','string','min:8','regex:/[a-z]/','regex:/[A-Z]/','regex:/[@$!%*#?&_]/','confirmed',],
         ]);
 
         if (!Hash::check($validated['current_password'], $user->password)) {
@@ -204,4 +204,23 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Logout berhasil',
         ]);
-    }}
+    }
+    public function updateProfile(Request $request)
+{
+    $user = $request->user();
+
+    $validated = $request->validate([
+        'nama_lengkap' => ['required', 'string', 'max:255'],
+        'no_telepon' => ['nullable', 'string', 'max:20'],
+        'alamat' => ['nullable', 'string', 'max:500'],
+    ]);
+
+    $user->update($validated);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Biodata berhasil diperbarui',
+        'user' => $user,
+    ]);
+}}
+

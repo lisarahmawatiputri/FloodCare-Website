@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 Route::middleware('auth:sanctum')->post('/profile/photo', [AuthController::class, 'updateProfilePhoto']);
+Route::middleware('auth:sanctum')->put('/profile/update', [AuthController::class, 'updateProfile']);
 Route::middleware('auth:sanctum')->post('/fcm-token', [AuthController::class, 'updateFcmToken']);
 /*
 |--------------------------------------------------------------------------
@@ -111,4 +112,12 @@ Route::get('/video-terbaru', [VideoController::class, 'latest']);
 
 Route::middleware('auth:sanctum')->get('/laporan-banjir', [LaporanController::class, 'index']);
 Route::middleware('auth:sanctum')->post('/laporan-banjir', [LaporanController::class, 'store']);
+Route::middleware('auth:sanctum')->get('/laporan-banjir/{id}', [LaporanController::class, 'show']);
 
+/*
+|--------------------------------------------------------------------------
+| RIWAYAT LAPORAN
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')->get('/riwayat-laporan', [LaporanController::class, 'riwayat']);

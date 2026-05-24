@@ -66,6 +66,68 @@ class LaporanController extends Controller
         'message' => 'Data laporan banjir valid berhasil diambil',
         'data' => $laporans,
     ]);
-}
+    
+    }
+    public function riwayat(Request $request)
+{
+    $laporans = Laporan::where('user_id', $request->user()->id)
+        ->latest()
+        ->get()
+        ->map(function ($laporan) {
+            return [
+                'id' => $laporan->id,
+                'judul' => $laporan->judul,
+                'deskripsi' => $laporan->deskripsi,
+                'foto_url' => $laporan->foto_laporan
+                    ? asset('storage/' . $laporan->foto_laporan)
+                    : null,
+                'latitude' => $laporan->latitude,
+                'longitude' => $laporan->longitude,
+                'alamat_lokasi' => $laporan->alamat_lokasi,
+                'tinggi_banjir_cm' => $laporan->tinggi_banjir_cm,
+                'tingkat_risiko' => $laporan->tingkat_risiko,
+                'status_laporan' => $laporan->status_laporan,
+                'created_at' => $laporan->created_at->format('d M Y'),
+            ];
+        });
 
+    return response()->json([
+        'success' => true,
+        'data' => $laporans,
+    ]);
+}
+    public function show(Request $request, $id)
+{
+    $laporan = Laporan::with('pelapor')->find($id);
+
+    if (!$laporan) {
+        return response()->json(['message' => 'Laporan tidak ditemukan'], 404);
+    }
+
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'id' => $laporan->id,
+            'judul' => $laporan->judul,
+            'deskripsi' => $laporan->deskripsi,
+            'foto_url' => $laporan->foto_laporan
+                ? asset('storage/' . $laporan->foto_laporan)
+                : null,
+            'latitude' => $laporan->latitude,
+            'longitude' => $laporan->longitude,
+            'alamat_lokasi' => $laporan->alamat_lokasi,
+            'tinggi_banjir_cm' => $laporan->tinggi_banjir_cm,
+            'tingkat_risiko' => $laporan->tingkat_risiko,
+            'status_laporan' => $laporan->status_laporan,
+            'jumlah_konfirmasi' => $laporan->jumlah_konfirmasi,
+            'created_at' => $laporan->created_at->format('d M Y • H:i'),
+            'pelapor' => $laporan->pelapor ? [
+                'nama' => $laporan->pelapor->nama_lengkap,
+                'foto' => $laporan->pelapor->foto_profil
+                    ? asset('storage/' . $laporan->pelapor->foto_profil)
+                    : null,
+            ] : null,
+        ],
+    ]);
+}
 }
