@@ -1,10 +1,11 @@
-@extends('LandingPage.layouts.app')
+@extends('LandingPage.Layouts.app')
 
 @section('title', 'FloodCare — Lapor & Pantau Banjir Realtime')
 
 @section('content')
-    @include('LandingPage.partials.hero')
-    @include('LandingPage.partials.features')
-    @include('LandingPage.partials.faq')
-    @include('LandingPage.partials.cta')
+    @include('LandingPage.Partials.hero')
+    @include('LandingPage.Partials.features')
+    @include('LandingPage.Partials.faq')
+    @include('LandingPage.Partials.cta')
+    @include('LandingPage.Partials.cta')
 @endsection

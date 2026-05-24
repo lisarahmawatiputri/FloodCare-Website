@@ -35,13 +35,13 @@
 </head>
 <body class="bg-white text-ink antialiased">
 
-    @include('LandingPage.partials.navbar')
+    @include('LandingPage.Partials.navbar')
 
     <main>
         @yield('content')
     </main>
 
-    @include('LandingPage.partials.footer')
+    @include('LandingPage.Partials.footer')
 
     <script src="{{ asset('assets/js/main.js') }}"></script>
     @stack('scripts')

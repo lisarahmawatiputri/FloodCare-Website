@@ -52,11 +52,11 @@ Route::post('/auth/google', [GoogleAuthController::class, 'login']);
 */
 
 Route::post('/forgot-password', [ForgotPasswordOtpController::class, 'sendOtp']);
-
+Route::post('/verify-otp', [ForgotPasswordOtpController::class, 'verifyOtp']);
 Route::post('/reset-password', [ForgotPasswordOtpController::class, 'resetPassword']);
+
 Route::middleware('auth:sanctum')->post('/verify-password', [AuthController::class, 'verifyPassword']);
 Route::middleware('auth:sanctum')->post('/change-password', [AuthController::class, 'changePassword']);
-
 /*
 |--------------------------------------------------------------------------
 | DONASI
@@ -77,7 +77,9 @@ Route::post(
     '/donasi/{id}/simulate-success',
     [DonationPaymentController::class, 'simulateSuccess']
 );
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/donations/history', [DonationPaymentController::class, 'history']);
+});
 /*
 |--------------------------------------------------------------------------
 | PROGRAM DONASI

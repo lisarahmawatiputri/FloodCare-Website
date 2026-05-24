@@ -178,4 +178,33 @@ public function simulateSuccess($id)
         'donasi' => $donasi->fresh(),
     ]);
 }
+
+public function history(Request $request)
+{
+    $donations = DB::table('donasi')
+        ->leftJoin('program_donasi', 'donasi.program_donasi_id', '=', 'program_donasi.id')
+        ->where('donasi.user_id', $request->user()->id)
+        ->select(
+            'donasi.id',
+            'donasi.program_donasi_id as program_id',
+            'donasi.midtrans_order_id as order_id',
+            'donasi.kode_transaksi',
+            'donasi.nominal as amount',
+            'donasi.status_pembayaran as status',
+            'donasi.snap_token',
+            'donasi.snap_url',
+            'donasi.created_at',
+            'donasi.updated_at',
+            'program_donasi.nama_program as program_title',
+            'program_donasi.foto as program_image'
+        )
+        ->orderByDesc('donasi.created_at')
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Riwayat donasi berhasil diambil.',
+        'data' => $donations,
+    ]);
+}
 }
