@@ -7,5 +7,4 @@
     @include('LandingPage.Partials.features')
     @include('LandingPage.Partials.faq')
     @include('LandingPage.Partials.cta')
-    @include('LandingPage.Partials.cta')
 @endsection
