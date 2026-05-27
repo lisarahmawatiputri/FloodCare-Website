@@ -116,6 +116,7 @@
 
             </div>
 
+            {{-- ALAMAT --}}
             <div class="flp-info-cell flp-info-cell-mt">
 
                 <div class="flp-info-label">
@@ -123,13 +124,22 @@
                 </div>
 
                 <div class="flp-info-value">
-
                     {{ $laporan->alamat_lokasi ?? '-' }}
-
                 </div>
 
             </div>
 
+            {{-- DESKRIPSI --}} 
+            @if($laporan->deskripsi)
+            <div class="flp-info-cell flp-info-cell-mt">
+                <div class="flp-info-label">
+                    Deskripsi
+                </div>
+                <div class="flp-info-value" style="line-height:0.6; white-space:pre-line;">
+                    {{ $laporan->deskripsi }}
+                </div>
+            </div>
+            @endif
         </div>
 
     </div>

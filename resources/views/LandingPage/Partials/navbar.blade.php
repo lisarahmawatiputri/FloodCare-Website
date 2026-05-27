@@ -1,7 +1,6 @@
 <header class="navbar fixed top-0 inset-x-0 z-50">
   <nav class="max-w-7xl mx-auto px-5 lg:px-8 h-[72px] flex items-center justify-between">
 
-    {{-- Logo (ganti src dengan logo kamu) --}}
     <a href="#home" class="flex items-center gap-2.5 group">
             <img 
                 src="{{ asset('assets/img/FloodCare.svg') }}" 
@@ -13,7 +12,6 @@
         </span>
     </a>
 
-    {{-- Desktop menu --}}
     <ul class="hidden lg:flex items-center gap-9">
       <li><a href="#home"     data-target="home"     class="nav-link active">Home</a></li>
       <li><a href="#features" data-target="features" class="nav-link">Features</a></li>

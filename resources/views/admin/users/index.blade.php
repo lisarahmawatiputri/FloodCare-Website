@@ -124,10 +124,16 @@
             @endphp
             <tr>
                 <td class="user-no">{{ $users->firstItem() + $i }}</td>
-                <td>
-                    <div class="user-identity-wrap">
-                        <div class="user-avatar" style="background:{{ $color }}">
-                            {{ strtoupper(substr($user->nama_lengkap, 0, 2)) }}
+                <td style="width: 220px; max-width: 220px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="user-avatar" style="{{ $user->foto_profil ? '' : 'background:' . $color }}">
+                          
+                        @if($user->foto_profil)
+                                <img src="{{ asset('storage/' . $user->foto_profil) }}"
+                                    style="width:100%; height:100%; object-fit:cover;">
+                            @else
+                                {{ strtoupper(substr($user->nama_lengkap, 0, 2)) }}
+                            @endif
                         </div>
                         <div>
                             <div class="user-nama">{{ $user->nama_lengkap }}</div>

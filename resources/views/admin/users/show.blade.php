@@ -38,9 +38,16 @@ $color    = $colors[crc32($user->email) % count($colors)];
 
         {{-- Profile Card --}}
         <div class="user-profile-card">
-            <div class="user-profile-avatar" style="background:{{ $color }}">
-                {{ $initials }}
-            </div>
+           @if($user->foto_profil)
+                <div class="user-profile-avatar" style="background:transparent; overflow:hidden; padding:0;">
+                    <img src="{{ asset('storage/' . $user->foto_profil) }}"
+                         style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                </div>
+            @else
+                <div class="user-profile-avatar" style="background:{{ $color }}">
+                    {{ $initials }}
+                </div>
+            @endif
             <div class="user-profile-name">{{ $user->nama_lengkap }}</div>
             <div class="user-profile-email">{{ $user->email }}</div>
 

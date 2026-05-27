@@ -16,22 +16,13 @@ use App\Models\Artikel;
 use App\Models\User;
 use App\Models\Donasi;
 
-/*
-|--------------------------------------------------------------------------
-| LANDING PAGE
-|--------------------------------------------------------------------------
-*/
+// landing pg
 
 Route::get('/', function () {
     return view('LandingPage.index');
 })->name('landing');
 
-
-/*
-|--------------------------------------------------------------------------
-| DASHBOARD USER
-|--------------------------------------------------------------------------
-*/
+// dashboard
 
 Route::get('/dashboard', function () {
 
@@ -43,11 +34,6 @@ Route::get('/dashboard', function () {
 
     $totalUser = User::count();
 
-    /*
-    |--------------------------------------------------------------------------
-    | DONASI
-    |--------------------------------------------------------------------------
-    */
 
     $totalDonasi = Donasi::whereIn('status_pembayaran', ['sukses', 'success'])
         ->sum('nominal');
@@ -57,21 +43,11 @@ Route::get('/dashboard', function () {
         ->distinct('user_id')
         ->count('user_id');
 
-    /*
-    |--------------------------------------------------------------------------
-    | LAPORAN TERBARU
-    |--------------------------------------------------------------------------
-    */
-
+   
     $laporanTerbaru = Laporan::orderBy('updated_at', 'desc')
         ->take(5)
         ->get();
 
-    /*
-    |--------------------------------------------------------------------------
-    | SEBARAN WILAYAH
-    |--------------------------------------------------------------------------
-    */
 
     $sebaranKecamatan = Laporan::get()
     ->groupBy(function ($item) {
@@ -81,10 +57,9 @@ Route::get('/dashboard', function () {
             return trim($matches[1]);
         }
 
-        return null; // tidak ada kecamatan
+        return null; 
     })
     ->filter(function ($items, $nama) {
-        // Buang yang null, kosong, atau sampah
         if (is_null($nama) || trim($nama) === '') return false;
         if (strlen(trim($nama)) <= 2) return false;
         return true;
@@ -98,22 +73,12 @@ Route::get('/dashboard', function () {
     ->sortByDesc('jumlah')
     ->take(6);
     
-    /*
-    |--------------------------------------------------------------------------
-    | VALIDASI
-    |--------------------------------------------------------------------------
-    */
 
     $butuhValidasi = Laporan::where('status_laporan', 'menunggu')
         ->count();
         
 
-    /*
-    |--------------------------------------------------------------------------
-    | LAPORAN RENDAH BULAN INI
-    |--------------------------------------------------------------------------
-    */
-
+    
     $rendahBulanIni = Laporan::where('tingkat_risiko', 'rendah')
         ->where(function ($q) {
             $q->whereMonth('created_at', now()->month)
@@ -136,11 +101,7 @@ Route::get('/dashboard', function () {
 
 })->middleware(['auth'])->name('dashboard');
 
-/*
-|--------------------------------------------------------------------------
-| PROFILE
-|--------------------------------------------------------------------------
-*/
+
 
 Route::middleware('auth')->group(function () {
 
@@ -154,23 +115,14 @@ Route::middleware('auth')->group(function () {
         ->name('profile.destroy');
 });
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN
-|--------------------------------------------------------------------------
-*/
+// admin routes
 
 Route::middleware(['auth'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | DASHBOARD ADMIN
-    |--------------------------------------------------------------------------
-    */
-
+   
     Route::get('/dashboard', function () {
 
         $totalLaporan = Laporan::count();
@@ -181,11 +133,7 @@ Route::middleware(['auth'])
 
         $totalUser = User::count();
 
-        /*
-        |--------------------------------------------------------------------------
-        | DONASI
-        |--------------------------------------------------------------------------
-        */
+        
 
         $totalDonasi = Donasi::whereIn('status_pembayaran', ['sukses', 'success'])
             ->sum('nominal');
@@ -195,22 +143,12 @@ Route::middleware(['auth'])
             ->distinct('user_id')
             ->count('user_id');
 
-        /*
-        |--------------------------------------------------------------------------
-        | LAPORAN TERBARU
-        |--------------------------------------------------------------------------
-        */
 
         $laporanTerbaru = Laporan::orderBy('updated_at', 'desc')
             ->take(5)
             ->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | SEBARAN WILAYAH
-        |--------------------------------------------------------------------------
-        */
-
+        
         $sebaranKecamatan = Laporan::get()
     ->groupBy(function ($item) {
         $alamat = trim($item->alamat_lokasi ?? '');
@@ -219,10 +157,9 @@ Route::middleware(['auth'])
             return trim($matches[1]);
         }
 
-        return null; // tidak ada kecamatan
+        return null; 
     })
     ->filter(function ($items, $nama) {
-        // Buang yang null, kosong, atau sampah
         if (is_null($nama) || trim($nama) === '') return false;
         if (strlen(trim($nama)) <= 2) return false;
         return true;
@@ -239,11 +176,7 @@ Route::middleware(['auth'])
         $butuhValidasi = Laporan::where('status_laporan', 'menunggu')
             ->count();
 
-        /*
-        |--------------------------------------------------------------------------
-        | LAPORAN RENDAH BULAN INI
-        |--------------------------------------------------------------------------
-        */
+    
 
         $rendahBulanIni = Laporan::where('tingkat_risiko', 'rendah')
             ->where(function ($q) {
@@ -267,11 +200,7 @@ Route::middleware(['auth'])
 
     })->name('dashboard');
 
-    /*
-    |--------------------------------------------------------------------------
-    | LAPORAN
-    |--------------------------------------------------------------------------
-    */
+   // laporan
 
     Route::get('/laporan', [LaporanController::class, 'index'])
         ->name('laporan.index');
@@ -288,11 +217,7 @@ Route::middleware(['auth'])
     Route::delete('/laporan/{id}', [LaporanController::class, 'destroy'])
         ->name('laporan.destroy');
 
-    /*
-    |--------------------------------------------------------------------------
-    | DONASI
-    |--------------------------------------------------------------------------
-    */
+    // donasi
 
     Route::get('/donasi', [DonasiController::class, 'index'])
         ->name('donasi.index');
@@ -333,38 +258,20 @@ Route::middleware(['auth'])
     )->whereNumber('id')
      ->name('donasi.updateStatus');
 
-    /*
-    |--------------------------------------------------------------------------
-    | ARTIKEL
-    |--------------------------------------------------------------------------
-    */
-
+    //artikel
     Route::prefix('artikel')->name('artikel.')->group(function () {
 
-        Route::get('/', [ArtikelController::class, 'index'])
-            ->name('index');
+    Route::get('/', [ArtikelController::class, 'index'])->name('index');
+    Route::get('/create', [ArtikelController::class, 'create'])->name('create');
+    Route::post('/', [ArtikelController::class, 'store'])->name('store');
 
-        Route::get('/create', [ArtikelController::class, 'create'])
-            ->name('create');
+    Route::get('/{artikel}', [ArtikelController::class, 'show'])->name('show'); // ← TAMBAH INI
 
-        Route::post('/', [ArtikelController::class, 'store'])
-            ->name('store');
-
-        Route::get('/{artikel}/edit', [ArtikelController::class, 'edit'])
-            ->name('edit');
-
-        Route::patch('/{artikel}', [ArtikelController::class, 'update'])
-            ->name('update');
-
-        Route::delete('/{artikel}', [ArtikelController::class, 'destroy'])
-            ->name('destroy');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | VIDEO
-    |--------------------------------------------------------------------------
-    */
+    Route::get('/{artikel}/edit', [ArtikelController::class, 'edit'])->name('edit');
+    Route::patch('/{artikel}', [ArtikelController::class, 'update'])->name('update');
+    Route::delete('/{artikel}', [ArtikelController::class, 'destroy'])->name('destroy');
+});
+    // video
 
     Route::prefix('video')->name('video.')->group(function () {
 
@@ -391,11 +298,7 @@ Route::middleware(['auth'])
         );
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | USERS
-    |--------------------------------------------------------------------------
-    */
+    // users
 
     Route::get('/users',
         [UserController::class, 'index']
@@ -438,5 +341,30 @@ Route::middleware(['auth'])
     )->name('users.blokir');
 
 });
+
+//notifikasi
+
+Route::get('/notifications/stream', function () {
+    return response()->stream(function () {
+        while (true) {
+           $count = \App\Models\Laporan::where('status_laporan', 'menunggu')->count();
+            $latest = \App\Models\Laporan::where('status_laporan', 'menunggu')->latest()->first();
+
+            echo "data: " . json_encode([
+                'count' => $count,
+                'judul' => $latest?->judul ?? '',
+                'waktu' => $latest?->created_at?->diffForHumans() ?? '',
+            ]) . "\n\n";
+
+            ob_flush();
+            flush();
+            sleep(10);
+        }
+    }, 200, [
+        'Content-Type'      => 'text/event-stream',
+        'Cache-Control'     => 'no-cache',
+        'X-Accel-Buffering' => 'no',
+    ]);
+})->middleware('auth');
 
 require __DIR__.'/auth.php';

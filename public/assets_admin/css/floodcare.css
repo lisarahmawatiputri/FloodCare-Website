@@ -1958,6 +1958,7 @@ body {
     font-weight: 700;
     color: white;
     flex-shrink: 0;
+    overflow: hidden;
 }
 
 .user-nama {
@@ -1965,12 +1966,20 @@ body {
     font-weight: 600;
     color: var(--text-main);
     line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
 }
 
 .user-email {
     font-size: 11px;
     color: var(--text-muted);
     margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
 }
 
 .user-phone {

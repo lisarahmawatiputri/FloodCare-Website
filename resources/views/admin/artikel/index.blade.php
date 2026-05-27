@@ -80,7 +80,11 @@
                         </div>
                     </td>
                     <td>
-                        <div class="fc-table-title">{{ $artikel->judul }}</div>
+                        <a href="{{ route('admin.artikel.show', $artikel->id) }}"
+                        style="color:inherit; text-decoration:none; font-weight:600;"
+                        class="fc-table-title">
+                            {{ $artikel->judul }}
+                        </a>                        
                         <div class="fc-table-meta">{{ Str::limit($artikel->konten, 60) }}</div>
                     </td>
                     <td>
@@ -93,12 +97,12 @@
                             {{ $artikel->status === 'dipublikasi' ? 'Dipublikasi' : ($artikel->status === 'draft' ? 'Draft' : 'Diarsip') }}
                         </span>
                     </td>
-                    <td>
+                    <!-- <td>   
                         <div class="fc-views">
                             <i class="mdi mdi-eye-outline"></i>
                             {{ $artikel->dilihat ? number_format($artikel->dilihat) : '—' }}
                         </div>
-                    </td>
+                    </td> -->
                     <td>
                         <div class="fc-action-group">
                             <a href="{{ route('admin.artikel.edit', $artikel->id) }}" class="fc-action-btn" title="Edit">

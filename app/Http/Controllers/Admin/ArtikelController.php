@@ -28,6 +28,10 @@ class ArtikelController extends Controller
         return view('admin.artikel.index', compact('artikels'));
     }
 
+    public function show(Artikel $artikel)
+{
+    return view('admin.artikel.show', compact('artikel'));
+}
     public function create()
     {
         return view('admin.artikel.create');
@@ -44,7 +48,6 @@ class ArtikelController extends Controller
             'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        // Logic Slug
         $slug = $request->slug ?: Str::slug($request->judul);
         $originalSlug = $slug;
         $count = 1;
@@ -52,13 +55,10 @@ class ArtikelController extends Controller
             $slug = $originalSlug . '-' . $count++;
         }
 
-        // --- PERBAIKAN LOGIC UPLOAD ---
         $thumbnailName = null;
         if ($request->hasFile('thumbnail')) {
             $file = $request->file('thumbnail');
-            // Buat nama file unik (misal: 1715123456.jpg)
             $thumbnailName = time() . '.' . $file->getClientOriginalExtension();
-            // Simpan file ke folder fisik: storage/app/public/foto_thumbnail
             $file->storeAs('foto_thumbnail', $thumbnailName, 'public');
         }
 
@@ -66,7 +66,7 @@ class ArtikelController extends Controller
             'judul'       => $request->judul,
             'slug'        => $slug,
             'konten'      => $request->konten,
-            'thumbnail'   => $thumbnailName, // Hanya simpan nama file
+            'thumbnail'   => $thumbnailName, 
             'penulis'     => $request->penulis,
             'uploaded_by' => Auth::id(),
             'status'      => $request->status,
@@ -103,10 +103,8 @@ class ArtikelController extends Controller
             $slug = $newSlug;
         }
 
-        // --- PERBAIKAN LOGIC UPLOAD UPDATE ---
         $thumbnailName = $artikel->thumbnail;
         if ($request->hasFile('thumbnail')) {
-            // Hapus foto lama jika ada
             if ($artikel->thumbnail) {
                 Storage::disk('public')->delete('foto_thumbnail/' . $artikel->thumbnail);
             }
@@ -132,7 +130,6 @@ class ArtikelController extends Controller
     public function destroy(Artikel $artikel)
     {
         if ($artikel->thumbnail) {
-            // Hapus file fisik dari folder foto_thumbnail
             Storage::disk('public')->delete('foto_thumbnail/' . $artikel->thumbnail);
         }
         $artikel->delete();

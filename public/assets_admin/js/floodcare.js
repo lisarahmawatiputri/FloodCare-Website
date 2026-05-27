@@ -303,10 +303,6 @@ function updateDurasiFormat(secs) {
 }
 
 
-/* ============================================================
-   LAPORAN — Modal helpers
-   ============================================================ */
-
 var _deleteTarget = null;
 
 function openModal(id) {
@@ -344,9 +340,8 @@ function exportLaporan() {
     alert('Fitur export belum terhubung ke controller.');
 }
 
-/* ============================================================
-   ARTIKEL — Debounce Search
-   ============================================================ */
+
+   // artikel
 
 let _searchTimer;
 function debounceSearch() {
@@ -355,3 +350,39 @@ function debounceSearch() {
         document.getElementById('filter-form').submit();
     }, 500);
 }
+
+(function () {
+    if (!window.APP || !window.APP.notifStreamUrl) return;
+
+    var source = new EventSource(window.APP.notifStreamUrl);
+
+    source.onmessage = function (e) {
+        var data = JSON.parse(e.data);
+
+        var badge = document.getElementById('notif-badge');
+        if (badge) {
+            if (data.count > 0) {
+                badge.textContent = data.count;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        var text = document.getElementById('notif-text');
+        if (text) {
+            text.textContent = data.count > 0
+                ? data.judul + ' ' + data.waktu
+                : 'Tidak ada laporan baru';
+        }
+
+        var validasiEl = document.querySelector('.butuh-validasi');
+        if (validasiEl) {
+            validasiEl.textContent = data.count;
+        }
+    };
+
+    source.onerror = function () {
+        console.warn('SSE reconnecting...');
+    };
+})();

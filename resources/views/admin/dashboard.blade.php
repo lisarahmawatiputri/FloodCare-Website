@@ -28,7 +28,7 @@ STATISTIK ATAS
 
         <div class="stat-trend up">
             <i class="mdi mdi-trending-up"></i>
-            Data realtime dari database
+            laporan masuk
         </div>
     </div>
 
@@ -166,9 +166,6 @@ ROW 2
 
     </div>
 
-    {{-- =========================
-    SEBARAN WILAYAH
-    ========================= --}}
     <div class="dash-card">
 
         <div class="dash-card-header">
@@ -272,7 +269,7 @@ ROW 3
 
         <div class="summary-number">
 
-            {{ $butuhValidasi ?? 0 }}
+           <span class="butuh-validasi">{{ $butuhValidasi ?? 0 }}</span>
 
         </div>
 
@@ -308,6 +305,7 @@ ROW 3
             Dari total {{ $totalLaporan ?? 0 }} laporan
 
         </div>
+
 
     </div>
 

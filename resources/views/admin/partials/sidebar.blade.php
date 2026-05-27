@@ -1,15 +1,39 @@
 <aside class="fc-sidebar">
 
     {{-- User Card --}}
-    <div class="fc-user-card">
-        <div class="fc-user-avatar">
-            {{ strtoupper(substr(Auth::user()->nama_lengkap, 0, 2)) }}
+<div class="fc-user-card">
+
+    @php
+        $nama = trim(Auth::user()->nama_lengkap ?? '');
+        $kata = array_filter(explode(' ', $nama));
+
+        if (count($kata) >= 2) {
+            $inisial = strtoupper(
+                substr($kata[0], 0, 1) .
+                substr(end($kata), 0, 1)
+            );
+        } elseif (count($kata) == 1) {
+            $inisial = strtoupper(substr($kata[0], 0, 1));
+        } else {
+            $inisial = '?';
+        }
+    @endphp
+
+    <div class="fc-user-avatar">
+        {{ $inisial }}
+    </div>
+
+    <div>
+        <div class="fc-user-name">
+            {{ Auth::user()->nama_lengkap }}
         </div>
-        <div>
-            <div class="fc-user-name">{{ Auth::user()->nama_lengkap }}</div>
-            <div class="fc-user-role">{{ ucfirst(Auth::user()->role) }}</div>
+
+        <div class="fc-user-role">
+            {{ ucfirst(Auth::user()->role) }}
         </div>
     </div>
+
+</div>
 
     {{-- UTAMA --}}
     <div class="fc-nav-section">Utama</div>
