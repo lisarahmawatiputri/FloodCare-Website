@@ -178,7 +178,7 @@
                                 <th>Program</th>
                                 <th>Nominal</th>
                                 <th>Status</th>
-                                <th>Edit</th>
+                                <!-- <th>Edit</th> -->
                             </tr>
                         </thead>
 
@@ -201,7 +201,7 @@
                                         </span>
                                     </td>
 
-                                    <td>
+                                    <!-- <td>
 
                                         <a href="{{ route('admin.donasi.show',$d->id) }}"
                                            class="btn btn-sm text-white mb-1"
@@ -227,7 +227,7 @@
                                             <button class="btn btn-sm btn-danger">Gagal</button>
                                         </form>
 
-                                    </td>
+                                    </td> -->
                                 </tr>
 
                             @empty
