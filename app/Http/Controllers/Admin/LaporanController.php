@@ -62,7 +62,7 @@ class LaporanController extends Controller
     {
         $factory = (new Factory)
             ->withServiceAccount(
-                storage_path('app/firebase/firebase-credentials.json')
+                storage_path('app/firebase/firebase_credentials.json')
             );
 
         $messaging = $factory->createMessaging();

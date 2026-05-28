@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Midtrans\Config;
-use Midtrans\Snap;
-use Midtrans\Notification;
 use App\Models\Donasi;
 use App\Models\ProgramDonasi;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Midtrans\Config;
+use Midtrans\Snap;
+
 class DonationPaymentController extends Controller
 {
     public function createPayment(Request $request)
@@ -23,26 +24,25 @@ class DonationPaymentController extends Controller
 
         $user = $request->user();
 
-        Config::$serverKey = config('midtrans.server_key');
-        Config::$isProduction = (bool) config('midtrans.is_production');
-        Config::$isSanitized = (bool) config('midtrans.is_sanitized');
-        Config::$is3ds = (bool) config('midtrans.is_3ds');
+        $this->configureMidtrans();
 
         return DB::transaction(function () use ($request, $user) {
             $orderId = 'DON-' . now()->format('YmdHis') . '-' . strtoupper(substr(md5(uniqid()), 0, 6));
 
-            $donasiId = DB::table('donasi')->insertGetId([
+            $donasi = Donasi::create([
                 'user_id' => $user->id,
                 'program_donasi_id' => $request->program_donasi_id,
                 'nominal' => $request->amount,
                 'metode_pembayaran' => 'midtrans',
+                'payment_type' => null,
                 'status_pembayaran' => 'menunggu',
                 'kode_transaksi' => $orderId,
                 'midtrans_order_id' => $orderId,
+                'snap_token' => null,
+                'snap_url' => null,
                 'pesan' => $request->pesan,
                 'is_anonymous' => $request->boolean('is_anonymous'),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'paid_at' => null,
             ]);
 
             $params = [
@@ -67,17 +67,15 @@ class DonationPaymentController extends Controller
 
             $transaction = Snap::createTransaction($params);
 
-            DB::table('donasi')
-                ->where('id', $donasiId)
-                ->update([
-                    'snap_token' => $transaction->token,
-                    'snap_url' => $transaction->redirect_url,
-                    'updated_at' => now(),
-                ]);
+            $donasi->update([
+                'snap_token' => $transaction->token,
+                'snap_url' => $transaction->redirect_url,
+            ]);
 
             return response()->json([
+                'success' => true,
                 'message' => 'Transaksi donasi berhasil dibuat.',
-                'donasi_id' => $donasiId,
+                'donasi_id' => $donasi->id,
                 'order_id' => $orderId,
                 'amount' => (int) $request->amount,
                 'snap_token' => $transaction->token,
@@ -87,124 +85,253 @@ class DonationPaymentController extends Controller
     }
 
     public function notification(Request $request)
-{
-    \Midtrans\Config::$serverKey = config('midtrans.server_key');
-    \Midtrans\Config::$isProduction = (bool) config('midtrans.is_production');
-    \Midtrans\Config::$isSanitized = (bool) config('midtrans.is_sanitized');
-    \Midtrans\Config::$is3ds = (bool) config('midtrans.is_3ds');
+    {
+        $payload = $request->all();
 
-    $notification = new \Midtrans\Notification();
+        Log::info('Midtrans notification masuk', $payload);
 
-    $orderId = $notification->order_id;
-    $transactionStatus = $notification->transaction_status;
-    $fraudStatus = $notification->fraud_status ?? null;
-    $paymentType = $notification->payment_type ?? null;
+        $orderId = $payload['order_id'] ?? null;
+        $statusCode = $payload['status_code'] ?? null;
+        $grossAmount = $payload['gross_amount'] ?? null;
+        $signatureKey = $payload['signature_key'] ?? null;
 
-    $status = 'menunggu';
-    $paidAt = null;
+        if (!$orderId || !$statusCode || !$grossAmount || !$signatureKey) {
+            Log::warning('Payload Midtrans tidak lengkap', $payload);
 
-    if ($transactionStatus === 'capture') {
-        if ($fraudStatus === 'accept') {
-            $status = 'sukses';
-            $paidAt = now();
-        }
-    } elseif ($transactionStatus === 'settlement') {
-        $status = 'sukses';
-        $paidAt = now();
-    } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel', 'failure'])) {
-        $status = 'gagal';
-    } elseif (in_array($transactionStatus, ['pending', 'challenge'])) {
-        $status = 'menunggu';
-    }
-
-    return DB::transaction(function () use ($orderId, $status, $paidAt, $paymentType) {
-        $donasi = DB::table('donasi')
-            ->where('midtrans_order_id', $orderId)
-            ->lockForUpdate()
-            ->first();
-
-        if (! $donasi) {
             return response()->json([
-                'message' => 'Donasi tidak ditemukan.',
-            ], 404);
+                'success' => false,
+                'message' => 'Payload Midtrans tidak lengkap.',
+            ], 400);
         }
 
-        $statusSebelumnya = $donasi->status_pembayaran;
+        $serverKey = config('midtrans.server_key') ?: env('MIDTRANS_SERVER_KEY');
 
-        DB::table('donasi')
-            ->where('id', $donasi->id)
-            ->update([
-                'status_pembayaran' => $status,
-                'payment_type' => $paymentType,
-                'paid_at' => $paidAt,
-                'updated_at' => now(),
+        if (!$serverKey) {
+            Log::error('MIDTRANS_SERVER_KEY belum dikonfigurasi.');
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Server key Midtrans belum dikonfigurasi.',
+            ], 500);
+        }
+
+        $expectedSignature = hash(
+            'sha512',
+            $orderId . $statusCode . $grossAmount . $serverKey
+        );
+
+        if (!hash_equals($expectedSignature, $signatureKey)) {
+            Log::warning('Signature Midtrans tidak valid', [
+                'order_id' => $orderId,
             ]);
 
-        if ($status === 'sukses' && $statusSebelumnya !== 'sukses') {
-            DB::table('program_donasi')
-                ->where('id', $donasi->program_donasi_id)
-                ->increment('terkumpul', $donasi->nominal);
+            return response()->json([
+                'success' => false,
+                'message' => 'Signature Midtrans tidak valid.',
+            ], 403);
         }
 
-        return response()->json([
-            'message' => 'Notification handled.',
-            'order_id' => $orderId,
-            'status' => $status,
-        ]);
-    });
-}
-public function simulateSuccess($id)
-{
-    $donasi = Donasi::findOrFail($id);
+        $transactionStatus = $payload['transaction_status'] ?? null;
+        $fraudStatus = $payload['fraud_status'] ?? null;
+        $paymentType = $payload['payment_type'] ?? null;
 
-    if ($donasi->status_pembayaran === 'sukses') {
+        $statusBaru = $this->normalizeMidtransStatus($transactionStatus, $fraudStatus);
+
+        return DB::transaction(function () use (
+            $orderId,
+            $statusBaru,
+            $paymentType,
+            $transactionStatus,
+            $fraudStatus
+        ) {
+            $donasi = Donasi::where(function ($query) use ($orderId) {
+                    $query->where('midtrans_order_id', $orderId)
+                        ->orWhere('kode_transaksi', $orderId);
+                })
+                ->lockForUpdate()
+                ->first();
+
+            if (!$donasi) {
+                Log::warning('Donasi tidak ditemukan untuk callback Midtrans', [
+                    'order_id' => $orderId,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Donasi tidak ditemukan.',
+                ], 404);
+            }
+
+            $statusLama = $this->normalizeLocalStatus($donasi->status_pembayaran);
+
+            if ($statusLama === 'sukses' && $statusBaru !== 'sukses') {
+                Log::info('Callback Midtrans diabaikan karena donasi sudah sukses', [
+                    'order_id' => $orderId,
+                    'donasi_id' => $donasi->id,
+                    'status_lama' => $statusLama,
+                    'status_baru' => $statusBaru,
+                    'transaction_status' => $transactionStatus,
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Donasi sudah sukses, callback diabaikan.',
+                ]);
+            }
+
+            $donasi->update([
+                'status_pembayaran' => $statusBaru,
+                'payment_type' => $paymentType ?? $donasi->payment_type,
+                'metode_pembayaran' => $paymentType ?? $donasi->metode_pembayaran,
+                'paid_at' => $statusBaru === 'sukses'
+                    ? ($donasi->paid_at ?? now())
+                    : null,
+            ]);
+
+            $this->syncProgramDonationAmount($donasi, $statusLama, $statusBaru);
+
+            Log::info('Status pembayaran donasi berhasil diperbarui otomatis dari Midtrans', [
+                'order_id' => $orderId,
+                'donasi_id' => $donasi->id,
+                'status_lama' => $statusLama,
+                'status_baru' => $statusBaru,
+                'transaction_status' => $transactionStatus,
+                'fraud_status' => $fraudStatus,
+                'payment_type' => $paymentType,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Notification Midtrans berhasil diproses.',
+                'order_id' => $orderId,
+                'status' => $statusBaru,
+            ]);
+        });
+    }
+
+    public function simulateSuccess($id)
+    {
+        return DB::transaction(function () use ($id) {
+            $donasi = Donasi::lockForUpdate()->findOrFail($id);
+
+            $statusLama = $this->normalizeLocalStatus($donasi->status_pembayaran);
+
+            if ($statusLama === 'sukses') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Donasi sudah pernah diproses.',
+                ]);
+            }
+
+            $donasi->update([
+                'status_pembayaran' => 'sukses',
+                'paid_at' => $donasi->paid_at ?? now(),
+            ]);
+
+            $this->syncProgramDonationAmount($donasi, $statusLama, 'sukses');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Donasi berhasil disimulasikan.',
+                'donasi' => $donasi->fresh(),
+            ]);
+        });
+    }
+
+    public function history(Request $request)
+    {
+        $donations = DB::table('donasi')
+            ->leftJoin('program_donasi', 'donasi.program_donasi_id', '=', 'program_donasi.id')
+            ->where('donasi.user_id', $request->user()->id)
+            ->select(
+                'donasi.id',
+                'donasi.program_donasi_id as program_id',
+                'donasi.midtrans_order_id as order_id',
+                'donasi.kode_transaksi',
+                'donasi.nominal as amount',
+                'donasi.status_pembayaran as status',
+                'donasi.payment_type',
+                'donasi.metode_pembayaran',
+                'donasi.snap_token',
+                'donasi.snap_url',
+                'donasi.paid_at',
+                'donasi.created_at',
+                'donasi.updated_at',
+                'program_donasi.nama_program as program_title',
+                'program_donasi.foto as program_image'
+            )
+            ->orderByDesc('donasi.created_at')
+            ->get();
+
         return response()->json([
-            'message' => 'Donasi sudah pernah diproses',
+            'success' => true,
+            'message' => 'Riwayat donasi berhasil diambil.',
+            'data' => $donations,
         ]);
     }
 
-    DB::transaction(function () use ($donasi) {
-        $donasi->update([
-            'status_pembayaran' => 'sukses',
-            'paid_at' => now(),
-        ]);
+    private function configureMidtrans(): void
+    {
+        Config::$serverKey = config('midtrans.server_key') ?: env('MIDTRANS_SERVER_KEY');
+        Config::$isProduction = (bool) (config('midtrans.is_production') ?? env('MIDTRANS_IS_PRODUCTION', false));
+        Config::$isSanitized = (bool) (config('midtrans.is_sanitized') ?? env('MIDTRANS_IS_SANITIZED', true));
+        Config::$is3ds = (bool) (config('midtrans.is_3ds') ?? env('MIDTRANS_IS_3DS', true));
+    }
 
-        ProgramDonasi::where('id', $donasi->program_donasi_id)
-            ->increment('terkumpul', $donasi->nominal);
-    });
+    private function normalizeMidtransStatus(?string $transactionStatus, ?string $fraudStatus): string
+    {
+        if ($transactionStatus === 'settlement') {
+            return 'sukses';
+        }
 
-    return response()->json([
-        'message' => 'Donasi berhasil disimulasikan',
-        'donasi' => $donasi->fresh(),
-    ]);
-}
+        if ($transactionStatus === 'capture') {
+            return $fraudStatus === 'accept' ? 'sukses' : 'menunggu';
+        }
 
-public function history(Request $request)
-{
-    $donations = DB::table('donasi')
-        ->leftJoin('program_donasi', 'donasi.program_donasi_id', '=', 'program_donasi.id')
-        ->where('donasi.user_id', $request->user()->id)
-        ->select(
-            'donasi.id',
-            'donasi.program_donasi_id as program_id',
-            'donasi.midtrans_order_id as order_id',
-            'donasi.kode_transaksi',
-            'donasi.nominal as amount',
-            'donasi.status_pembayaran as status',
-            'donasi.snap_token',
-            'donasi.snap_url',
-            'donasi.created_at',
-            'donasi.updated_at',
-            'program_donasi.nama_program as program_title',
-            'program_donasi.foto as program_image'
-        )
-        ->orderByDesc('donasi.created_at')
-        ->get();
+        if (in_array($transactionStatus, ['pending', 'challenge'], true)) {
+            return 'menunggu';
+        }
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Riwayat donasi berhasil diambil.',
-        'data' => $donations,
-    ]);
-}
+        if (in_array($transactionStatus, ['deny', 'expire', 'cancel', 'failure'], true)) {
+            return 'gagal';
+        }
+
+        return 'menunggu';
+    }
+
+    private function normalizeLocalStatus(?string $status): string
+    {
+        return match ($status) {
+            'success', 'sukses', 'settlement' => 'sukses',
+            'pending', 'menunggu', 'challenge' => 'menunggu',
+            'failed', 'failure', 'deny', 'expire', 'cancel', 'gagal' => 'gagal',
+            default => 'menunggu',
+        };
+    }
+
+    private function syncProgramDonationAmount(Donasi $donasi, string $statusLama, string $statusBaru): void
+    {
+        $program = ProgramDonasi::lockForUpdate()->find($donasi->program_donasi_id);
+
+        if (!$program) {
+            return;
+        }
+
+        if ($statusLama !== 'sukses' && $statusBaru === 'sukses') {
+            $program->terkumpul = (float) $program->terkumpul + (float) $donasi->nominal;
+        }
+
+        if ($statusLama === 'sukses' && $statusBaru !== 'sukses') {
+            $program->terkumpul = max(
+                0,
+                (float) $program->terkumpul - (float) $donasi->nominal
+            );
+        }
+
+        $program->status = ((float) $program->terkumpul >= (float) $program->target_dana)
+            ? 'selesai'
+            : 'aktif';
+
+        $program->save();
+    }
 }

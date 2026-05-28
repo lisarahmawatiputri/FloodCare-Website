@@ -24,9 +24,17 @@
       </p>
 
       <div class="mt-9 flex flex-wrap gap-3">
-        <a href="#cta" class="btn-primary">
-          Download 
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+       <a href="https://github.com/lisarahmawatiputri/FloodCare-Mobile/releases/latest/download/floodcare.apk"
+        class="btn-primary"
+        target="_blank"
+        rel="noopener">
+        Download 
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.4"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14"/>
+            <path d="m19 12-7 7-7-7"/>
+        </svg>
         </a>
         <a href="#features" class="btn-ghost">
           Lihat Fitur

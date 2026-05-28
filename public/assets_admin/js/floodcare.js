@@ -413,43 +413,51 @@ function debounceSearch() {
     }, 500);
 }
 
-// (function () {
-//     if (!window.APP || !window.APP.notifStreamUrl) return;
 
-//     var source = new EventSource(window.APP.notifStreamUrl);
+(function () {
+    if (
+        !window.APP ||
+        !window.APP.pusherKey ||
+        !window.APP.pusherCluster ||
+        typeof Pusher === 'undefined'
+    ) {
+        console.warn('Pusher admin tidak aktif: konfigurasi belum lengkap.');
+        return;
+    }
 
-//     source.onmessage = function (e) {
-//         var data = JSON.parse(e.data);
+    if (!window.adminPusher) {
+        window.adminPusher = new Pusher(window.APP.pusherKey, {
+            cluster: window.APP.pusherCluster,
+            forceTLS: true,
+        });
+    }
 
-//         var badge = document.getElementById('notif-badge');
-//         if (badge) {
-//             if (data.count > 0) {
-//                 badge.textContent = data.count;
-//                 badge.style.display = 'inline-flex';
-//             } else {
-//                 badge.style.display = 'none';
-//             }
-//         }
+    if (!window.adminLaporanChannel) {
+        window.adminLaporanChannel = window.adminPusher.subscribe('admin-laporan');
+    }
 
-//         var text = document.getElementById('notif-text');
-//         if (text) {
-//             text.textContent = data.count > 0
-//                 ? data.judul + ' ' + data.waktu
-//                 : 'Tidak ada laporan baru';
-//         }
+    window.adminLaporanChannel.bind('laporan-baru', function (data) {
+        console.log('Notif laporan baru dari Pusher:', data);
 
-//         var validasiEl = document.querySelector('.butuh-validasi');
-//         if (validasiEl) {
-//             validasiEl.textContent = data.count;
-//         }
-//     };
+        const badge = document.getElementById('notif-badge');
+        if (badge) {
+            const current = parseInt(badge.textContent || '0', 10) || 0;
+            badge.textContent = current + 1;
+            badge.style.display = 'inline-flex';
+        }
 
-//     source.onerror = function () {
-//         console.warn('SSE reconnecting...');
-//     };
-// })();
+        const text = document.getElementById('notif-text');
+        if (text) {
+            text.textContent = (data.judul || 'Laporan banjir baru') + ' baru saja masuk';
+        }
 
-// Notifikasi polling
+        const validasiEl = document.querySelector('.butuh-validasi');
+        if (validasiEl) {
+            const current = parseInt(validasiEl.textContent || '0', 10) || 0;
+            validasiEl.textContent = current + 1;
+        }
+    });
+})();
 
 (function () {
     var url = window.APP && window.APP.notifUrl;
@@ -479,5 +487,5 @@ function debounceSearch() {
     }
 
     fetchNotif();
-    setInterval(fetchNotif, 10000); 
+    setInterval(fetchNotif, 10000);
 })();

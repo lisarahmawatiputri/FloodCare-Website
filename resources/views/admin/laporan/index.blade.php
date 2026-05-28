@@ -246,3 +246,42 @@
 </div>
 
 @endsection
+@section('extra-js')
+<script>
+    console.log('Pusher listener halaman laporan aktif');
+
+    if (!window.adminPusher) {
+        console.warn('window.adminPusher belum ada');
+    } else {
+        console.log('Pusher state awal:', window.adminPusher.connection.state);
+
+        window.adminPusher.connection.bind('connected', function () {
+            console.log('Pusher connected');
+        });
+
+        window.adminPusher.connection.bind('error', function (err) {
+            console.error('Pusher error:', err);
+        });
+    }
+
+    if (!window.adminLaporanChannel) {
+        console.warn('window.adminLaporanChannel belum ada');
+    } else {
+        console.log('Channel admin-laporan tersedia');
+
+        window.adminLaporanChannel.bind('pusher:subscription_succeeded', function () {
+            console.log('Subscribe admin-laporan berhasil');
+        });
+
+        window.adminLaporanChannel.bind_global(function (eventName, data) {
+            console.log('EVENT MASUK DARI PUSHER:', eventName, data);
+
+            if (eventName === 'laporan-baru') {
+                setTimeout(function () {
+                    window.location.reload();
+                }, 700);
+            }
+        });
+    }
+</script>
+@endsection

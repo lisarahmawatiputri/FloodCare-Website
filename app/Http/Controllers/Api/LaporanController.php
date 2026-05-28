@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
+use App\Events\LaporanBanjirBaru;
 use App\Http\Controllers\Controller;
 use App\Models\Laporan;
 use Illuminate\Http\Request;
@@ -30,7 +30,7 @@ class LaporanController extends Controller
         $validated['jumlah_konfirmasi'] = 0;
 
         $laporan = Laporan::create($validated);
-
+        broadcast(new LaporanBanjirBaru($laporan));
         return response()->json([
             'message' => 'Laporan banjir berhasil dikirim',
             'data' => $laporan,
@@ -66,7 +66,7 @@ class LaporanController extends Controller
         'message' => 'Data laporan banjir valid berhasil diambil',
         'data' => $laporans,
     ]);
-    
+
     }
     public function riwayat(Request $request)
 {

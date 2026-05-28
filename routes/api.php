@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\VideoController;
 use App\Http\Controllers\Api\LaporanController;
 
 
+
 /*
 |--------------------------------------------------------------------------
 | AUTH

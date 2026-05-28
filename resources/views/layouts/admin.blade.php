@@ -39,7 +39,7 @@
         Copyright &copy; {{ date('Y') }} <strong>FloodCare</strong>. All rights reserved.
     </footer>
 
-    
+
     <div id="fc-delete-modal" class="flp-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="fc-delete-modal-title">
         <div class="flp-modal">
             <div class="flp-modal-icon">
@@ -64,18 +64,26 @@
     {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-     <script>
-        window.APP = {
-            notifUrl: "{{ url('/notifications/count') }}"
+   <script>
+    window.APP = {
+        notifUrl: "{{ url('/notifications/count') }}"
 };
-    </script>
+</script>
 
+<script>
+    window.APP = {
+        notifUrl: "{{ url('/notifications/count') }}",
+        pusherKey: "{{ config('broadcasting.connections.pusher.key') }}",
+        pusherCluster: "{{ config('broadcasting.connections.pusher.options.cluster') }}"
+    };
+</script>
 
-    {{-- FloodCare Custom JS --}}
-    <script src="{{ asset('assets_admin/js/floodcare.js') }}"></script>
+<script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
 
-    @yield('extra-js')
-    @stack('scripts')
+<script src="{{ asset('assets_admin/js/floodcare.js') }}"></script>
+
+@yield('extra-js')
+@stack('scripts')
 
 </body>
 </html>
