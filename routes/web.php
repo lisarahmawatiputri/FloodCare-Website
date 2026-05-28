@@ -344,26 +344,14 @@ Route::middleware(['auth'])
 
 //notifikasi
 
-Route::get('/notifications/stream', function () {
-    return response()->stream(function () {
-        while (true) {
-           $count = \App\Models\Laporan::where('status_laporan', 'menunggu')->count();
-            $latest = \App\Models\Laporan::where('status_laporan', 'menunggu')->latest()->first();
+Route::get('/notifications/count', function () {
+    $count  = \App\Models\Laporan::where('status_laporan', 'menunggu')->count();
+    $latest = \App\Models\Laporan::where('status_laporan', 'menunggu')->latest()->first();
 
-            echo "data: " . json_encode([
-                'count' => $count,
-                'judul' => $latest?->judul ?? '',
-                'waktu' => $latest?->created_at?->diffForHumans() ?? '',
-            ]) . "\n\n";
-
-            ob_flush();
-            flush();
-            sleep(10);
-        }
-    }, 200, [
-        'Content-Type'      => 'text/event-stream',
-        'Cache-Control'     => 'no-cache',
-        'X-Accel-Buffering' => 'no',
+    return response()->json([
+        'count' => $count,
+        'judul' => $latest?->judul ?? '',
+        'waktu' => $latest?->created_at?->diffForHumans() ?? '',
     ]);
 })->middleware('auth');
 

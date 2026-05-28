@@ -190,13 +190,13 @@
                                 <i class="mdi mdi-eye-outline"></i>
                             </a>
                             <form action="{{ route('admin.laporan.destroy', $laporan->id) }}"
-                                  method="POST" class="flp-form-inline"
-                                  onsubmit="return confirm('Hapus laporan ini?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="fc-action-btn fc-action-btn-danger" title="Hapus">
-                                    <i class="mdi mdi-trash-can-outline"></i>
-                                </button>
-                            </form>
+                            method="POST" class="flp-form-inline">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="fc-action-btn fc-action-btn-danger" title="Hapus"
+                                    data-confirm="Hapus laporan ini? Tindakan tidak dapat dibatalkan.">
+                                <i class="mdi mdi-trash-can-outline"></i>
+                            </button>
+                        </form>
                         </div>
                     </td>
                 </tr>

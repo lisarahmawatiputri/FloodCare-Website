@@ -81,15 +81,15 @@
                    class="fc-btn fc-btn-ghost fc-btn-sm">
                     <i class="mdi mdi-pencil-outline"></i> Edit
                 </a>
-                <form action="{{ route('admin.video.destroy', $video->id) }}"
-                      method="POST" style="display:inline;"
-                      onsubmit="return confirm('Hapus video ini?')">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="fc-btn fc-btn-ghost fc-btn-sm"
-                            style="color:#c0392b;">
-                        <i class="mdi mdi-trash-can-outline"></i> Hapus
-                    </button>
-                </form>
+               <form action="{{ route('admin.video.destroy', $video->id) }}"
+                method="POST" style="display:inline;">
+                @csrf @method('DELETE')
+                <button type="submit" class="fc-btn fc-btn-ghost fc-btn-sm"
+                        style="color:#c0392b;"
+                        data-confirm="Hapus video ini? Tindakan menghapus data secara permanen.">
+                    <i class="mdi mdi-trash-can-outline"></i> Hapus
+                </button>
+            </form>
             </div>
         </div>
     </div>

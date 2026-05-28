@@ -103,20 +103,19 @@
             </div>
         </div>
 
-        <div class="fc-card" style="padding:20px;">
+        <!-- <div class="fc-card" style="padding:20px;">
             <h3 style="font-size:.9rem; font-weight:600; color:var(--fc-text-secondary); text-transform:uppercase; letter-spacing:.05em; margin-bottom:16px;">
                 Aksi
             </h3>
-            <form action="{{ route('admin.artikel.destroy', $artikel->id) }}" method="POST"
-                  onsubmit="return confirm('Yakin ingin menghapus artikel ini?');">
+            <form action="{{ route('admin.artikel.destroy', $artikel->id) }}" method="POST">
                 @csrf
                 @method('DELETE')
-                <button type="submit"
-                        style="width:100%; padding:9px; border-radius:8px; border:1px solid #fca5a5; background:#fff5f5; color:#dc2626; font-size:.875rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
-                    <i class="mdi mdi-trash-can-outline"></i> Hapus Artikel
+                <button type="submit" class="fc-action-btn fc-action-btn-danger" title="Hapus"
+                        data-confirm="Hapus artikel ini? Tindakan tidak dapat dibatalkan.">
+                    <i class="mdi mdi-trash-can-outline"></i>
                 </button>
             </form>
-        </div>
+        </div> -->
 
     </div>
 </div>

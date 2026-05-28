@@ -13,16 +13,15 @@
     {{-- Material Design Icons CDN --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
 
-    {{-- Bootstrap utilities for admin donation pages --}}
+    {{-- Bootstrap utilities --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 
     {{-- FloodCare Custom CSS --}}
     <link rel="stylesheet" href="{{ asset('assets_admin/css/floodcare.css') }}">
 
     @yield('extra-css')
+    @stack('styles')
 </head>
-
-    @stack('scripts')
 <body>
 
     {{-- NAVBAR --}}
@@ -40,23 +39,43 @@
         Copyright &copy; {{ date('Y') }} <strong>FloodCare</strong>. All rights reserved.
     </footer>
 
+    
+    <div id="fc-delete-modal" class="flp-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="fc-delete-modal-title">
+        <div class="flp-modal">
+            <div class="flp-modal-icon">
+                <i class="mdi mdi-trash-can-outline"></i>
+            </div>
+            <div class="flp-modal-title" id="fc-delete-modal-title">Hapus Data</div>
+            <div class="flp-modal-desc" id="fc-delete-modal-msg">Yakin ingin menghapus data ini?</div>
+            <div class="flp-modal-actions">
+                <button type="button" class="fc-btn fc-btn-ghost" onclick="closeFcDeleteModal()">
+                    Batal
+                </button>
+                <button type="button" class="fc-btn fc-btn-danger" id="fc-delete-modal-confirm">
+                    <i class="mdi mdi-trash-can-outline"></i> Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
     {{-- jQuery --}}
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 
     {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-    window.APP = {
-        notifStreamUrl: "{{ url('/notifications/stream') }}"
-    };
+     <script>
+        window.APP = {
+            notifUrl: "{{ url('/notifications/count') }}"
+};
     </script>
+
 
     {{-- FloodCare Custom JS --}}
     <script src="{{ asset('assets_admin/js/floodcare.js') }}"></script>
 
-
     @yield('extra-js')
-    
+    @stack('scripts')
+
 </body>
 </html>

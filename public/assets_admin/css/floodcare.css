@@ -4017,3 +4017,19 @@ body {
     background-image: none !important;
 }
 
+.flp-modal .fc-btn-danger {
+    background: #e74c3c;
+    color: white;
+    border: none;
+}
+ 
+.flp-modal .fc-btn-danger:hover {
+    background: #c0392b;
+    color: white;
+}
+
+/* Blokir modal variant */
+#fc-delete-modal.blokir .flp-modal-icon {
+    background: #fff0ec;
+    color: #cc3300;
+}

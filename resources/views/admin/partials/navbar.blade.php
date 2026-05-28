@@ -21,9 +21,9 @@
                           id="notif-badge"
                           style="display:none;">
                     </span>
-                </button>
+                </button> 
 
-                <div class="fc-dropdown-menu" style="min-width:240px;">
+                 <div class="fc-dropdown-menu" style="min-width:240px;">
                     <div class="fc-dropdown-label">Notifikasi</div>
                     <div class="fc-dropdown-divider"></div>
 
@@ -39,13 +39,13 @@
                        href="{{ route('admin.laporan.index') }}">
                         Lihat semua
                     </a>
-                </div>
-            </div>
+                </div> 
+            </div> 
 
-            <!-- {{-- Globe --}}
-            <button class="fc-nav-btn" type="button">
+            {{-- Globe --}}
+            <!-- <button class="fc-nav-btn" type="button">
                 <i class="mdi mdi-web"></i>
-            </button> -->
+            </button> --> 
 
             {{-- Profile --}}
             <div class="fc-dropdown" style="margin-left:4px;">

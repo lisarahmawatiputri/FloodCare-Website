@@ -100,10 +100,14 @@ $color    = $colors[crc32($user->email) % count($colors)];
 
                 {{-- Blokir / Sudah diblokir --}}
                 @if($user->status !== 'diblokir')
-                <form method="POST" action="{{ route('admin.users.blokir', $user->id) }}" class="fc-btn-full"
-                    onsubmit="return confirm('Yakin ingin memblokir user ini?')">
+                <form method="POST" action="{{ route('admin.users.blokir', $user->id) }}" class="fc-btn-full">
                     @csrf @method('PATCH')
-                    <button type="submit" class="fc-btn fc-btn-danger fc-btn-full">
+                    <button type="submit" class="fc-btn fc-btn-danger fc-btn-full"
+                            data-confirm="Yakin ingin memblokir user ini?"
+                            data-confirm-title="Blokir Akun"
+                            data-confirm-icon="mdi-cancel"
+                            data-confirm-btn-label="Blokir"
+                            data-confirm-variant="blokir">
                         <i class="mdi mdi-cancel"></i> Blokir akun
                     </button>
                 </form>

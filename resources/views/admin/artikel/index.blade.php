@@ -108,11 +108,11 @@
                             <a href="{{ route('admin.artikel.edit', $artikel->id) }}" class="fc-action-btn" title="Edit">
                                 <i class="mdi mdi-pencil-outline"></i>
                             </a>
-                            <form action="{{ route('admin.artikel.destroy', $artikel->id) }}" method="POST"
-                                  onsubmit="return confirm('Hapus artikel ini?');">
+                            <form action="{{ route('admin.artikel.destroy', $artikel->id) }}" method="POST">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="fc-action-btn fc-action-btn-danger" title="Hapus">
+                                <button type="submit" class="fc-action-btn fc-action-btn-danger" title="Hapus"
+                                        data-confirm="Hapus artikel ini? Tindakan ini akan menghapus data permanen.">
                                     <i class="mdi mdi-trash-can-outline"></i>
                                 </button>
                             </form>

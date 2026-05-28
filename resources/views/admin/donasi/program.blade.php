@@ -114,18 +114,15 @@
                                         Edit
                                     </a>
 
-                                    <form action="{{ route('admin.donasi.destroy',$p->id) }}"
-                                          method="POST"
-                                          onsubmit="return confirm('Yakin ingin menghapus program ini?')">
-
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button class="btn btn-sm btn-danger">
-                                            Hapus
-                                        </button>
-
-                                    </form>
+                                   <form action="{{ route('admin.donasi.destroy',$p->id) }}"
+                                    method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                            data-confirm="Yakin ingin menghapus program ini?">
+                                        Hapus
+                                    </button>
+                                </form>
 
                                 </div>
 

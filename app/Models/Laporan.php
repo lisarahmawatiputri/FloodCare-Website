@@ -68,11 +68,6 @@ class Laporan extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | RELASI VALIDATOR
-    |--------------------------------------------------------------------------
-    */
 
     public function validator()
     {

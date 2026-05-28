@@ -41,18 +41,30 @@
         }, delay);
     });
 
+   // confirm delete
+document.querySelectorAll('[data-confirm]').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+        e.preventDefault();
 
-    /* ----------------------------------------------------------
-       CONFIRM DELETE (tombol hapus tabel)
-    ---------------------------------------------------------- */
-    document.querySelectorAll('[data-confirm]').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-            var msg = this.getAttribute('data-confirm') || 'Yakin ingin menghapus data ini?';
-            if (!confirm(msg)) {
-                e.preventDefault();
-            }
-        });
+        var msg  = this.getAttribute('data-confirm') || 'Yakin ingin menghapus data ini?';
+        var href = this.getAttribute('href') || this.getAttribute('data-url') || null;
+        var form = this.closest('form');
+        var self = this;
+
+        var opts = {
+        title:    this.getAttribute('data-confirm-title')     || 'Hapus Data',
+        icon:     this.getAttribute('data-confirm-icon')      || 'mdi-trash-can-outline',
+        btnLabel: this.getAttribute('data-confirm-btn-label') || 'Hapus',
+        variant:  this.getAttribute('data-confirm-variant')   || '',
+    };
+        openFcDeleteModal(msg, function () {
+            closeFcDeleteModal();
+            if (href)      window.location.href = href;
+            else if (form) form.submit();
+            else           { self.removeAttribute('data-confirm'); self.click(); }
+        }, opts);
     });
+});
 
 
     /* ----------------------------------------------------------
@@ -113,7 +125,7 @@
 
 
     /* ----------------------------------------------------------
-       MODAL LAPORAN — helpers
+       MODAL LAPORAN — tutup saat klik backdrop
     ---------------------------------------------------------- */
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.flp-modal-overlay').forEach(function (overlay) {
@@ -147,12 +159,62 @@
         });
     });
 
+    /* ----------------------------------------------------------
+       ESC — tutup semua modal
+    ---------------------------------------------------------- */
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeFcDeleteModal();
+        }
+    });
+
 })();
 
 
 /* ============================================================
+   GLOBAL DELETE MODAL HELPERS
+   (global scope — bisa dipanggil dari mana saja)
+   ============================================================ */
+
+function openFcDeleteModal(msg, onConfirm, opts) {
+    var modal      = document.getElementById('fc-delete-modal');
+    var msgEl      = document.getElementById('fc-delete-modal-msg');
+    var titleEl    = document.getElementById('fc-delete-modal-title');
+    var iconEl     = document.querySelector('#fc-delete-modal .flp-modal-icon i');
+    var iconWrap   = document.querySelector('#fc-delete-modal .flp-modal-icon');
+    var confirmBtn = document.getElementById('fc-delete-modal-confirm');
+
+    if (!modal) return;
+
+    opts = opts || {};
+
+    // Reset class dulu
+    modal.className = 'flp-modal-overlay';
+    if (opts.variant) modal.classList.add(opts.variant);
+
+    if (msgEl)   msgEl.textContent   = msg;
+    if (titleEl) titleEl.textContent = opts.title    || 'Hapus Data';
+    if (iconEl)  iconEl.className    = 'mdi ' + (opts.icon || 'mdi-trash-can-outline');
+    if (confirmBtn) {
+        confirmBtn.innerHTML = '<i class="mdi ' + (opts.icon || 'mdi-trash-can-outline') + '"></i> ' + (opts.btnLabel || 'Hapus');
+    }
+
+    var newBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+    newBtn.addEventListener('click', onConfirm);
+
+    modal.classList.add('open');
+}
+
+function closeFcDeleteModal() {
+    var modal = document.getElementById('fc-delete-modal');
+    if (modal) modal.classList.remove('open');
+}
+
+
+/* ============================================================
    THUMBNAIL — Preview & Upload
-   (global function, dipanggil dari blade via onchange)
+   (global — dipanggil dari blade via onchange)
    ============================================================ */
 
 function previewThumb(input) {
@@ -165,24 +227,25 @@ function previewThumb(input) {
     }
     var reader = new FileReader();
     reader.onload = function (e) {
-        var preview = document.getElementById('thumb-preview');
+        var preview     = document.getElementById('thumb-preview');
         var placeholder = document.getElementById('thumb-placeholder');
-        if (preview) {
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-        }
-        if (placeholder) placeholder.style.display = 'none';
+        var actions     = document.getElementById('thumbActions');
+        if (preview)     { preview.src = e.target.result; preview.style.display = 'block'; }
+        if (placeholder)   placeholder.style.display = 'none';
+        if (actions)       actions.style.display = 'flex';
     };
     reader.readAsDataURL(file);
 }
 
 function clearThumb() {
-    var input = document.getElementById('thumbnail');
-    var preview = document.getElementById('thumb-preview');
+    var input       = document.getElementById('thumbnail');
+    var preview     = document.getElementById('thumb-preview');
     var placeholder = document.getElementById('thumb-placeholder');
-    if (input) input.value = '';
-    if (preview) { preview.src = ''; preview.style.display = 'none'; }
+    var actions     = document.getElementById('thumbActions');
+    if (input)       input.value = '';
+    if (preview)     { preview.src = ''; preview.style.display = 'none'; }
     if (placeholder) placeholder.style.display = 'flex';
+    if (actions)     actions.style.display = 'none';
 }
 
 function handleThumbDrop(e) {
@@ -194,16 +257,13 @@ function handleThumbDrop(e) {
     var dt = new DataTransfer();
     dt.items.add(file);
     var input = document.getElementById('thumbnail');
-    if (input) {
-        input.files = dt.files;
-        previewThumb(input);
-    }
+    if (input) { input.files = dt.files; previewThumb(input); }
 }
 
 
 /* ============================================================
    STATUS ARTIKEL — radio highlight
-   (global function, dipanggil dari blade via onchange)
+   (global — dipanggil dari blade via onchange)
    ============================================================ */
 
 function setStatus(radio) {
@@ -221,54 +281,53 @@ function setStatus(radio) {
 function previewVideo(input) {
     if (!input.files || !input.files[0]) return;
     var file = input.files[0];
-    var maxSize = 500 * 1024 * 1024;
-    if (file.size > maxSize) {
+    if (file.size > 500 * 1024 * 1024) {
         alert('Ukuran video melebihi 500MB.');
         input.value = '';
         return;
     }
 
-    var url = URL.createObjectURL(file);
+    var url     = URL.createObjectURL(file);
     var videoEl = document.getElementById('video-preview');
     if (videoEl) {
         videoEl.src = url;
         videoEl.onloadedmetadata = function () {
-            var secs = Math.round(videoEl.duration);
+            var secs       = Math.round(videoEl.duration);
             var durasiInput = document.getElementById('durasi_detik');
             if (durasiInput) durasiInput.value = secs;
             updateDurasiFormat(secs);
         };
     }
 
-    var sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+    var sizeMB   = (file.size / (1024 * 1024)).toFixed(1);
     var videoInfo = document.getElementById('videoInfo');
     if (videoInfo) {
         videoInfo.innerHTML = '<i class="mdi mdi-file-video-outline"></i> ' + file.name + ' &bull; ' + sizeMB + ' MB';
     }
 
     var placeholder = document.getElementById('video-placeholder');
-    var selected = document.getElementById('video-selected');
-    var actions = document.getElementById('videoActions');
+    var selected    = document.getElementById('video-selected');
+    var actions     = document.getElementById('videoActions');
     if (placeholder) placeholder.style.display = 'none';
-    if (selected) selected.style.display = 'block';
-    if (actions) actions.style.display = 'flex';
+    if (selected)    selected.style.display = 'block';
+    if (actions)     actions.style.display = 'flex';
 }
 
 function clearVideo() {
-    var input = document.getElementById('file_video');
-    var videoEl = document.getElementById('video-preview');
-    var placeholder = document.getElementById('video-placeholder');
-    var selected = document.getElementById('video-selected');
-    var actions = document.getElementById('videoActions');
-    var durasiInput = document.getElementById('durasi_detik');
+    var input          = document.getElementById('file_video');
+    var videoEl        = document.getElementById('video-preview');
+    var placeholder    = document.getElementById('video-placeholder');
+    var selected       = document.getElementById('video-selected');
+    var actions        = document.getElementById('videoActions');
+    var durasiInput    = document.getElementById('durasi_detik');
     var durasiFormatted = document.getElementById('durasiFormatted');
 
-    if (input) input.value = '';
-    if (videoEl) videoEl.src = '';
-    if (placeholder) placeholder.style.display = 'flex';
-    if (selected) selected.style.display = 'none';
-    if (actions) actions.style.display = 'none';
-    if (durasiInput) durasiInput.value = '';
+    if (input)          input.value = '';
+    if (videoEl)        videoEl.src = '';
+    if (placeholder)    placeholder.style.display = 'flex';
+    if (selected)       selected.style.display = 'none';
+    if (actions)        actions.style.display = 'none';
+    if (durasiInput)    durasiInput.value = '';
     if (durasiFormatted) durasiFormatted.textContent = '';
 }
 
@@ -284,10 +343,7 @@ function handleVideoDrop(e) {
     var dt = new DataTransfer();
     dt.items.add(file);
     var input = document.getElementById('file_video');
-    if (input) {
-        input.files = dt.files;
-        previewVideo(input);
-    }
+    if (input) { input.files = dt.files; previewVideo(input); }
 }
 
 function updateDurasiFormat(secs) {
@@ -302,6 +358,10 @@ function updateDurasiFormat(secs) {
     }
 }
 
+
+/* ============================================================
+   LAPORAN — Modal helpers (delete, invalid)
+   ============================================================ */
 
 var _deleteTarget = null;
 
@@ -341,9 +401,11 @@ function exportLaporan() {
 }
 
 
-   // artikel
+/* ============================================================
+   ARTIKEL — Debounce search
+   ============================================================ */
 
-let _searchTimer;
+var _searchTimer;
 function debounceSearch() {
     clearTimeout(_searchTimer);
     _searchTimer = setTimeout(function () {
@@ -351,38 +413,71 @@ function debounceSearch() {
     }, 500);
 }
 
+// (function () {
+//     if (!window.APP || !window.APP.notifStreamUrl) return;
+
+//     var source = new EventSource(window.APP.notifStreamUrl);
+
+//     source.onmessage = function (e) {
+//         var data = JSON.parse(e.data);
+
+//         var badge = document.getElementById('notif-badge');
+//         if (badge) {
+//             if (data.count > 0) {
+//                 badge.textContent = data.count;
+//                 badge.style.display = 'inline-flex';
+//             } else {
+//                 badge.style.display = 'none';
+//             }
+//         }
+
+//         var text = document.getElementById('notif-text');
+//         if (text) {
+//             text.textContent = data.count > 0
+//                 ? data.judul + ' ' + data.waktu
+//                 : 'Tidak ada laporan baru';
+//         }
+
+//         var validasiEl = document.querySelector('.butuh-validasi');
+//         if (validasiEl) {
+//             validasiEl.textContent = data.count;
+//         }
+//     };
+
+//     source.onerror = function () {
+//         console.warn('SSE reconnecting...');
+//     };
+// })();
+
+// Notifikasi polling
+
 (function () {
-    if (!window.APP || !window.APP.notifStreamUrl) return;
+    var url = window.APP && window.APP.notifUrl;
+    if (!url) return;
 
-    var source = new EventSource(window.APP.notifStreamUrl);
+    function fetchNotif() {
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var badge = document.getElementById('notif-badge');
+                if (badge) {
+                    badge.textContent    = data.count;
+                    badge.style.display  = data.count > 0 ? 'inline-flex' : 'none';
+                }
 
-    source.onmessage = function (e) {
-        var data = JSON.parse(e.data);
+                var text = document.getElementById('notif-text');
+                if (text) {
+                    text.textContent = data.count > 0
+                        ? data.judul + ' ' + data.waktu
+                        : 'Tidak ada laporan baru';
+                }
 
-        var badge = document.getElementById('notif-badge');
-        if (badge) {
-            if (data.count > 0) {
-                badge.textContent = data.count;
-                badge.style.display = 'inline-flex';
-            } else {
-                badge.style.display = 'none';
-            }
-        }
+                var validasiEl = document.querySelector('.butuh-validasi');
+                if (validasiEl) validasiEl.textContent = data.count;
+            })
+            .catch(function () {});
+    }
 
-        var text = document.getElementById('notif-text');
-        if (text) {
-            text.textContent = data.count > 0
-                ? data.judul + ' ' + data.waktu
-                : 'Tidak ada laporan baru';
-        }
-
-        var validasiEl = document.querySelector('.butuh-validasi');
-        if (validasiEl) {
-            validasiEl.textContent = data.count;
-        }
-    };
-
-    source.onerror = function () {
-        console.warn('SSE reconnecting...');
-    };
+    fetchNotif();
+    setInterval(fetchNotif, 10000); 
 })();
